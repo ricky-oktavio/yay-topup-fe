@@ -531,4 +531,25 @@ const showFooterInfo = (title) => {
   font-size: 0.8rem;
   color: #94a3b8;
 }
+
+@media (max-width: 640px) {
+  .login-card {
+    padding: 1.75rem 1.25rem;
+    border-radius: 16px;
+  }
+  .login-title {
+    font-size: 1.65rem;
+  }
+  .demo-accounts-card {
+    padding: 0.85rem;
+  }
+  .demo-account-btn {
+    padding: 0.5rem 0.65rem;
+  }
+  .footer-links {
+    gap: 1rem;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+}
 </style>

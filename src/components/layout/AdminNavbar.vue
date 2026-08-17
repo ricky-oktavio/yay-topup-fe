@@ -232,9 +232,40 @@ const handleLogout = () => {
 }
 
 @media (max-width: 768px) {
+  .admin-nav-container {
+    padding: 0.5rem 0.85rem;
+    height: auto;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .admin-logo-img {
+    height: 30px;
+  }
+
+  .brand-text {
+    font-size: 1.1rem;
+  }
+
   .admin-nav-links {
-    gap: 0.85rem;
+    width: 100%;
+    order: 3;
+    overflow-x: auto;
+    white-space: nowrap;
+    gap: 1.15rem;
+    padding-bottom: 0.25rem;
+    padding-top: 0.4rem;
+    border-top: 1px solid #f1f5f9;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .admin-nav-item {
     font-size: 0.825rem;
+    padding: 0.25rem 0;
+  }
+
+  .admin-pill-badge {
+    display: none;
   }
 }
 </style>

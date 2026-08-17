@@ -697,4 +697,39 @@ const showFooterInfo = (title) => {
 .modal-fade-leave-to {
   opacity: 0;
 }
+
+@media (max-width: 640px) {
+  .admin-container {
+    padding: 0 1rem;
+  }
+  .admin-header-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.85rem;
+  }
+  .page-title {
+    font-size: 1.75rem;
+  }
+  .admin-card {
+    padding: 1.25rem 0.85rem;
+    border-radius: 16px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  .table-responsive-wrapper {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  .filter-pills {
+    overflow-x: auto;
+    white-space: nowrap;
+    width: 100%;
+    padding-bottom: 0.25rem;
+  }
+  .footer-inner {
+    flex-direction: column;
+    gap: 0.75rem;
+    text-align: center;
+  }
+}
 </style>

@@ -632,10 +632,31 @@ const showFooterInfo = (title) => {
 
 @media (max-width: 640px) {
   .main-title {
-    font-size: 2.1rem;
+    font-size: 1.85rem;
   }
   .topup-card {
-    padding: 1.75rem 1.25rem;
+    padding: 1.5rem 1.15rem;
+    border-radius: 16px;
+  }
+  .input-verified-flex-row {
+    flex-wrap: wrap;
+    gap: 0.45rem;
+  }
+  .side-verified-chip, .side-loading-chip {
+    font-size: 0.75rem;
+    padding: 0.4rem 0.65rem;
+  }
+  .coin-presets {
+    gap: 0.4rem;
+  }
+  .preset-chip {
+    padding: 0.45rem 0.6rem;
+    font-size: 0.775rem;
+  }
+  .footer-links {
+    gap: 1rem;
+    flex-wrap: wrap;
+    justify-content: center;
   }
 }
 </style>

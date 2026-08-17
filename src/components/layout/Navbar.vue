@@ -146,4 +146,26 @@ const handleProfile = () => {
 .huge-icon {
   color: currentColor;
 }
+
+@media (max-width: 640px) {
+  .navbar-header {
+    padding: 0.65rem 0;
+  }
+  .brand-emblem-clean {
+    height: 30px;
+  }
+  .brand-text {
+    font-size: 1.15rem;
+  }
+  .navbar-right {
+    gap: 0.45rem;
+  }
+  .nav-link-status {
+    font-size: 0.8rem;
+  }
+  .btn-auth {
+    padding: 0.4rem 0.75rem;
+    font-size: 0.8rem;
+  }
+}
 </style>
