@@ -1,9 +1,12 @@
 <template>
   <header class="navbar-header">
     <div class="container navbar-container">
-      <!-- Brand Logo (3D Gaming Emblem Concept 2 - Transparent PNG) -->
+      <!-- Brand Logo (3D Gaming Emblem + Clean Typography) -->
       <router-link to="/" class="navbar-brand" title="YayTopup">
         <img src="../../assets/logo_concept_2.png" alt="YayTopup Logo" class="brand-emblem-clean" />
+        <span class="brand-text">
+          <span class="brand-yay">Yay</span><span class="brand-topup">Topup</span>
+        </span>
       </router-link>
 
       <!-- Navigation Right Controls -->
@@ -60,22 +63,38 @@ const handleProfile = () => {
 .navbar-brand {
   display: flex;
   align-items: center;
+  gap: 0.55rem;
   text-decoration: none;
   background: transparent;
 }
 
 .brand-emblem-clean {
-  height: 42px;
+  height: 36px;
   width: auto;
   object-fit: contain;
-  background: transparent;
-  box-shadow: none;
-  border: none;
-  transition: transform 0.2s ease;
+  filter: drop-shadow(0 2px 6px rgba(124, 58, 237, 0.22));
+  transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.brand-text {
+  font-size: 1.3rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1;
+}
+
+.brand-yay {
+  color: #0f172a;
+}
+
+.brand-topup {
+  background: linear-gradient(135deg, #7c3aed 0%, #c026d3 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 
 .navbar-brand:hover .brand-emblem-clean {
-  transform: scale(1.08);
+  transform: scale(1.1) rotate(2deg);
 }
 
 .navbar-right {

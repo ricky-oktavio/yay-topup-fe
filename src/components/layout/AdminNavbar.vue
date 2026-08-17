@@ -4,6 +4,10 @@
       <!-- Admin Brand Logo -->
       <router-link to="/" class="admin-brand-logo" title="YayTopup Home">
         <img src="../../assets/logo_concept_2.png" alt="YayTopup Admin" class="admin-logo-img" />
+        <span class="brand-text">
+          <span class="brand-yay">Yay</span><span class="brand-topup">Topup</span>
+          <span class="admin-pill-badge">ADMIN</span>
+        </span>
       </router-link>
 
       <!-- Admin Nav Links -->
@@ -75,13 +79,46 @@ const handleLogout = () => {
 .admin-brand-logo {
   display: flex;
   align-items: center;
+  gap: 0.55rem;
   text-decoration: none;
 }
 
 .admin-logo-img {
-  height: 38px;
+  height: 36px;
   width: auto;
   object-fit: contain;
+  filter: drop-shadow(0 2px 6px rgba(124, 58, 237, 0.22));
+}
+
+.brand-text {
+  font-size: 1.25rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.brand-yay {
+  color: #0f172a;
+}
+
+.brand-topup {
+  background: linear-gradient(135deg, #7c3aed 0%, #c026d3 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.admin-pill-badge {
+  background: #f1f5f9;
+  color: #64748b;
+  font-size: 0.625rem;
+  font-weight: 800;
+  padding: 0.15rem 0.4rem;
+  border-radius: 6px;
+  letter-spacing: 0.05em;
+  border: 1px solid #e2e8f0;
 }
 
 .admin-nav-links {

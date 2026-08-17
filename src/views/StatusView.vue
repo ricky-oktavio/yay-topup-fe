@@ -90,6 +90,9 @@
       <div class="container footer-inner">
         <div class="footer-logo">
           <img src="../assets/logo_concept_2.png" alt="YayTopup Logo" class="footer-emblem-clean" />
+          <span class="brand-text">
+            <span class="brand-yay">Yay</span><span class="brand-topup">Topup</span>
+          </span>
         </div>
         <nav class="footer-links">
           <router-link to="/terms">Terms of Service</router-link>
@@ -368,21 +371,32 @@ const showFooterInfo = (title) => {
 .footer-logo {
   display: flex;
   align-items: center;
+  gap: 0.55rem;
   justify-content: center;
 }
 
 .footer-emblem-clean {
-  height: 28px;
+  height: 32px;
   width: auto;
   object-fit: contain;
+  filter: drop-shadow(0 2px 6px rgba(124, 58, 237, 0.2));
+}
+
+.brand-text {
+  font-size: 1.25rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1;
 }
 
 .brand-yay {
-  color: #18181b;
+  color: #0f172a;
 }
 
 .brand-topup {
-  color: #7c3aed;
+  background: linear-gradient(135deg, #7c3aed 0%, #c026d3 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 
 .footer-links {

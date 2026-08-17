@@ -148,9 +148,22 @@ const router = createRouter({
   }
 });
 
-// Navigation guard for document titles
+// Navigation guard for document titles & Open Graph meta tags
 router.beforeEach((to, from, next) => {
-  document.title = to.meta.title || 'YayTopup';
+  const pageTitle = to.meta.title || 'YayTopup - Platform Topup Game & E-Wallet';
+  document.title = pageTitle;
+
+  // Dynamically sync Open Graph Title
+  const ogTitleElement = document.querySelector('meta[property="og:title"]');
+  if (ogTitleElement) {
+    ogTitleElement.setAttribute('content', pageTitle);
+  }
+
+  const twitterTitleElement = document.querySelector('meta[name="twitter:title"]');
+  if (twitterTitleElement) {
+    twitterTitleElement.setAttribute('content', pageTitle);
+  }
+
   next();
 });
 

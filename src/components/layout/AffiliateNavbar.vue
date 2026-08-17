@@ -4,6 +4,10 @@
       <!-- Brand Logo -->
       <router-link to="/" class="affiliate-brand-logo" title="YayTopup Home">
         <img src="../../assets/logo_concept_2.png" alt="YayTopup Logo" class="affiliate-logo-img" />
+        <span class="brand-text">
+          <span class="brand-yay">Yay</span><span class="brand-topup">Topup</span>
+          <span class="partner-pill-badge">PARTNER</span>
+        </span>
       </router-link>
 
       <!-- Middle Nav Links (Optional/Minimalist) -->
@@ -71,13 +75,46 @@ const showNavNotice = (section) => {
 .affiliate-brand-logo {
   display: flex;
   align-items: center;
+  gap: 0.55rem;
   text-decoration: none;
 }
 
 .affiliate-logo-img {
-  height: 38px;
+  height: 36px;
   width: auto;
   object-fit: contain;
+  filter: drop-shadow(0 2px 6px rgba(124, 58, 237, 0.22));
+}
+
+.brand-text {
+  font-size: 1.25rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.brand-yay {
+  color: #0f172a;
+}
+
+.brand-topup {
+  background: linear-gradient(135deg, #7c3aed 0%, #c026d3 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.partner-pill-badge {
+  background: #fdf4ff;
+  color: #c026d3;
+  font-size: 0.625rem;
+  font-weight: 800;
+  padding: 0.15rem 0.4rem;
+  border-radius: 6px;
+  letter-spacing: 0.05em;
+  border: 1px solid #f0abfc;
 }
 
 .affiliate-nav-links {
