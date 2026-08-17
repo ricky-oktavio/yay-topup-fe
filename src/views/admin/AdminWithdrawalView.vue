@@ -168,9 +168,9 @@
           © 2026 YayTopup Admin. All rights reserved.
         </div>
         <div class="footer-right">
-          <a href="#" @click.prevent="showFooterInfo('Support')">Support</a>
-          <a href="#" @click.prevent="showFooterInfo('Privacy Policy')">Privacy Policy</a>
-          <a href="#" @click.prevent="showFooterInfo('Terms of Service')">Terms of Service</a>
+          <router-link to="/contact">Support</router-link>
+          <router-link to="/privacy">Privacy Policy</router-link>
+          <router-link to="/terms">Terms of Service</router-link>
         </div>
       </div>
     </footer>

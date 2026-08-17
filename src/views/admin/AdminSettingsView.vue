@@ -67,8 +67,8 @@
           © 2026 YayTopup. All rights reserved.
         </div>
         <div class="footer-right">
-          <a href="#" @click.prevent="showFooterInfo('Support')">Support</a>
-          <a href="#" @click.prevent="showFooterInfo('Policies')">Policies</a>
+          <router-link to="/contact">Support</router-link>
+          <router-link to="/terms">Terms & Policies</router-link>
         </div>
       </div>
     </footer>

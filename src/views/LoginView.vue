@@ -91,9 +91,9 @@
           <img src="../assets/logo_concept_2.png" alt="YayTopup Logo" class="footer-emblem-clean" />
         </div>
         <nav class="footer-links">
-          <a href="#" @click.prevent="showFooterInfo('Privacy Policy')">Privacy Policy</a>
-          <a href="#" @click.prevent="showFooterInfo('Terms of Service')">Terms of Service</a>
-          <a href="#" @click.prevent="showFooterInfo('Affiliate Program')">Affiliate Program</a>
+          <router-link to="/terms">Terms of Service</router-link>
+          <router-link to="/privacy">Privacy Policy</router-link>
+          <router-link to="/contact">Contact Us</router-link>
         </nav>
         <p class="footer-copyright">© 2026 YayTopup. All rights reserved.</p>
       </div>
@@ -121,7 +121,9 @@ const handleLoginSubmit = () => {
   isSubmitting.value = true;
   setTimeout(() => {
     isSubmitting.value = false;
-    store.showToast(`Berhasil login sebagai ${email.value}!`, 'success');
+    const username = email.value.split('@')[0];
+    store.loginUser({ email: email.value, name: username });
+    store.showToast(`Selamat datang kembali, ${username}!`, 'success');
     router.push('/');
   }, 500);
 };

@@ -89,22 +89,12 @@
     <footer class="momolive-footer">
       <div class="container footer-inner">
         <div class="footer-logo">
-          <svg width="32" height="32" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M8 6L20 23L32 6H25.2L20 14.5L14.8 6H8Z" fill="url(#ftrGrad3)" />
-            <path d="M17.5 20.5H22.5V34H17.5V20.5Z" fill="url(#ftrGrad3)" />
-            <circle cx="28" cy="11" r="3.5" fill="#EC4899" />
-            <defs>
-              <linearGradient id="ftrGrad3" x1="8" y1="6" x2="32" y2="34" gradientUnits="userSpaceOnUse">
-                <stop stop-color="#7C3AED" />
-                <stop offset="1" stop-color="#DB2777" />
-              </linearGradient>
-            </defs>
-          </svg>
+          <img src="../assets/logo_concept_2.png" alt="YayTopup Logo" class="footer-emblem-clean" />
         </div>
         <nav class="footer-links">
-          <a href="#" @click.prevent="showFooterInfo('Privacy Policy')">Privacy Policy</a>
-          <a href="#" @click.prevent="showFooterInfo('Terms of Service')">Terms of Service</a>
-          <a href="#" @click.prevent="showFooterInfo('Contact Us')">Contact Us</a>
+          <router-link to="/terms">Terms of Service</router-link>
+          <router-link to="/privacy">Privacy Policy</router-link>
+          <router-link to="/contact">Contact Us</router-link>
         </nav>
         <p class="footer-copyright">© 2026 YayTopup. All rights reserved.</p>
       </div>

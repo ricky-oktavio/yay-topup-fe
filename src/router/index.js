@@ -8,6 +8,11 @@ import TopupView from '../views/TopupView.vue';
 import HistoryView from '../views/HistoryView.vue';
 import ApiTestView from '../views/ApiTestView.vue';
 
+// Legal & Contact Views
+import TermsView from '../views/TermsView.vue';
+import PrivacyView from '../views/PrivacyView.vue';
+import ContactView from '../views/ContactView.vue';
+
 // Affiliate Views
 import AffiliateView from '../views/affiliate/AffiliateView.vue';
 import AffiliateDashboardView from '../views/affiliate/AffiliateDashboardView.vue';
@@ -25,6 +30,24 @@ const routes = [
     name: 'home',
     component: HomeView,
     meta: { title: 'YayTopup - Platform Topup Game & E-Wallet' }
+  },
+  {
+    path: '/terms',
+    name: 'terms',
+    component: TermsView,
+    meta: { title: 'Terms of Service - YayTopup' }
+  },
+  {
+    path: '/privacy',
+    name: 'privacy',
+    component: PrivacyView,
+    meta: { title: 'Privacy Policy - YayTopup' }
+  },
+  {
+    path: '/contact',
+    name: 'contact',
+    component: ContactView,
+    meta: { title: 'Contact Us - YayTopup' }
   },
   {
     path: '/affiliate/dashboard',

@@ -9,33 +9,35 @@
       <!-- Navigation Right Controls -->
       <div class="navbar-right">
         <router-link to="/status" class="nav-link-status">Cek Status</router-link>
-        <router-link to="/login" class="btn btn-outline btn-auth">Login</router-link>
-        <router-link to="/register" class="btn btn-solid-purple btn-auth">Register</router-link>
-        
-        <button class="user-avatar-btn" title="Akun Saya" @click="handleProfile">
-          <UserIcon :size="20" class="huge-icon" />
-        </button>
+
+        <!-- Tampilkan Tombol Login & Register Jika BELUM Login -->
+        <template v-if="!store.isLoggedIn">
+          <router-link to="/login" class="btn btn-outline btn-auth">Login</router-link>
+          <router-link to="/register" class="btn btn-solid-purple btn-auth">Register</router-link>
+        </template>
+
+        <!-- Tampilkan Profile Avatar & Logout Jika SUDAH Login -->
+        <template v-else>
+          <button class="user-avatar-btn" title="Akun Saya" @click="handleProfile">
+            <UserIcon :size="20" class="huge-icon" />
+          </button>
+          <button class="btn-logout-icon" title="Logout" @click="store.logoutUser">
+            <Logout01Icon :size="18" />
+          </button>
+        </template>
       </div>
     </div>
   </header>
 </template>
 
 <script setup>
-import { UserIcon } from 'hugeicons-vue';
+import { UserIcon, Logout01Icon } from 'hugeicons-vue';
 import { useTopupStore } from '../../stores/topupStore';
 
 const store = useTopupStore();
 
-const handleLogin = () => {
-  store.showToast('Fitur Login siap diintegrasikan dengan API auth', 'info');
-};
-
-const handleRegister = () => {
-  store.showToast('Fitur Registrasi siap diintegrasikan dengan API auth', 'info');
-};
-
 const handleProfile = () => {
-  store.showToast('Profil Pengguna Momolive Topup', 'info');
+  store.showToast(`Halo, ${store.user?.name || 'User'}! Saldo Anda: ${store.formattedBalance}`, 'info');
 };
 </script>
 

@@ -30,6 +30,10 @@ export const useTopupStore = defineStore('topup', {
       message: ''
     },
 
+    // User Auth & Session State
+    isLoggedIn: false,
+    user: null,
+
     // User Balance / Points
     userBalance: 250000,
     userPoints: 1450,
@@ -50,6 +54,17 @@ export const useTopupStore = defineStore('topup', {
   },
 
   actions: {
+    // Auth actions
+    loginUser(userData = { name: 'User' }) {
+      this.isLoggedIn = true;
+      this.user = userData;
+    },
+    logoutUser() {
+      this.isLoggedIn = false;
+      this.user = null;
+      this.showToast('Anda telah logout.', 'info');
+    },
+
     // Show Toast Notification
     showToast(message, type = 'info', duration = 3500) {
       this.toast.message = message;

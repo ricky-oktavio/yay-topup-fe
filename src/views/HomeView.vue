@@ -23,12 +23,33 @@
           <!-- Field 1: ID MOMOCOIN -->
           <div class="form-group">
             <label class="form-label-uppercase">ID MOMOCOIN</label>
-            <input 
-              v-model="momocoinId" 
-              type="text" 
-              class="form-input-styled" 
-              placeholder="Masukkan ID Momocoin kamu"
-            />
+
+            <div class="input-verified-flex-row">
+              <input 
+                v-model="momocoinId" 
+                type="text" 
+                class="form-input-styled flex-input" 
+                :class="{ 'is-input-verified': isVerified, 'is-input-loading': isCheckingUser }"
+                placeholder="Masukkan ID Momocoin kamu"
+              />
+
+              <!-- Loading & Verified Badges Beside Textform Input -->
+              <Transition name="side-fade" mode="out-in">
+                <!-- Loading State Badge -->
+                <div v-if="isCheckingUser" class="side-loading-chip">
+                  <Loading01Icon :size="16" class="spin-icon" />
+                  <span class="loading-text">Memeriksa ID...</span>
+                </div>
+
+                <!-- Verified State Badge -->
+                <div v-else-if="isVerified" class="side-verified-chip">
+                  <CheckmarkBadge01Icon :size="16" class="verified-icon" />
+                  <span class="verified-name">{{ verifiedUsername }}</span>
+                  <span class="verified-pill">Verified</span>
+                </div>
+              </Transition>
+            </div>
+
             <span class="hint-text">Contoh: 123456789</span>
           </div>
 
@@ -108,9 +129,9 @@
           <img src="../assets/logo_concept_2.png" alt="YayTopup Logo" class="footer-emblem-clean" />
         </div>
         <nav class="footer-links">
-          <a href="#" @click.prevent="showFooterInfo('Terms of Service')">Terms of Service</a>
-          <a href="#" @click.prevent="showFooterInfo('Privacy Policy')">Privacy Policy</a>
-          <a href="#" @click.prevent="showFooterInfo('Contact Us')">Contact Us</a>
+          <router-link to="/terms">Terms of Service</router-link>
+          <router-link to="/privacy">Privacy Policy</router-link>
+          <router-link to="/contact">Contact Us</router-link>
         </nav>
         <p class="footer-copyright">© 2026 YayTopup. All rights reserved.</p>
       </div>
@@ -119,9 +140,9 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, watch } from 'vue';
 import { useRouter } from 'vue-router';
-import { Coins01Icon, ArrowRight01Icon } from 'hugeicons-vue';
+import { Coins01Icon, ArrowRight01Icon, CheckmarkBadge01Icon, CheckmarkCircle01Icon, Loading01Icon } from 'hugeicons-vue';
 import { useTopupStore } from '../stores/topupStore';
 
 const router = useRouter();
@@ -131,6 +152,35 @@ const momocoinId = ref('');
 const referralCode = ref('');
 const coinAmount = ref(0);
 const isLoading = ref(false);
+
+// Interactive Account Verification with Loading Animation
+const isCheckingUser = ref(false);
+const isVerified = ref(false);
+const verifiedUsername = ref('');
+let checkTimer = null;
+
+watch(momocoinId, (newVal) => {
+  const trimmed = newVal.trim();
+  if (checkTimer) clearTimeout(checkTimer);
+
+  if (trimmed.length < 4) {
+    isCheckingUser.value = false;
+    isVerified.value = false;
+    verifiedUsername.value = '';
+    return;
+  }
+
+  // Tampilkan animasi loading saat user mengetik
+  isCheckingUser.value = true;
+  isVerified.value = false;
+
+  // Simulasi verifikasi ID dengan animasi spinner selama 400ms
+  checkTimer = setTimeout(() => {
+    isCheckingUser.value = false;
+    isVerified.value = true;
+    verifiedUsername.value = `Momo#${trimmed.slice(-4)}`;
+  }, 450);
+});
 
 const presets = [100, 500, 1000, 5000, 10000];
 
@@ -297,6 +347,104 @@ const showFooterInfo = (title) => {
   border-radius: 20px;
   padding: 2.25rem 2rem;
   box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.07);
+}
+
+/* Verified & Loading Badge Design (Beside Textform Input) */
+.input-verified-flex-row {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  width: 100%;
+}
+
+.flex-input {
+  flex: 1;
+  width: 100%;
+}
+
+.side-loading-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: #fdf4ff;
+  border: 1px solid #f0abfc;
+  color: #c026d3;
+  padding: 0.55rem 0.85rem;
+  border-radius: 10px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  box-shadow: 0 4px 12px rgba(192, 38, 211, 0.12);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.spin-icon {
+  animation: spinLoader 0.75s linear infinite;
+  color: #a855f7;
+}
+
+@keyframes spinLoader {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.form-input-styled.is-input-loading {
+  border-color: #c026d3;
+  background: #faf5ff;
+  box-shadow: 0 0 0 3px rgba(192, 38, 211, 0.15);
+}
+
+.side-verified-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  background: #ecfdf5;
+  border: 1px solid #a7f3d0;
+  color: #059669;
+  padding: 0.55rem 0.85rem;
+  border-radius: 10px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.12);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.side-verified-chip .verified-icon {
+  color: #10b981;
+}
+
+.side-verified-chip .verified-name {
+  color: #065f46;
+  font-weight: 700;
+}
+
+.side-verified-chip .verified-pill {
+  background: #10b981;
+  color: #ffffff;
+  font-size: 0.65rem;
+  font-weight: 800;
+  padding: 0.1rem 0.4rem;
+  border-radius: 4px;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+.form-input-styled.is-input-verified {
+  border-color: #10b981;
+  background: #f0fdf4;
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15);
+}
+
+.side-fade-enter-active,
+.side-fade-leave-active {
+  transition: all 0.25s ease;
+}
+
+.side-fade-enter-from,
+.side-fade-leave-to {
+  opacity: 0;
+  transform: translateX(6px);
 }
 
 .margin-top-md {

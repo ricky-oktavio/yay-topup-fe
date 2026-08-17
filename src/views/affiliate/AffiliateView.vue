@@ -171,9 +171,9 @@
           <img src="../../assets/logo_concept_2.png" alt="YayTopup Logo" class="footer-emblem-clean" />
         </div>
         <nav class="footer-links">
-          <a href="#" @click.prevent="showFooterInfo('Privacy Policy')">Privacy Policy</a>
-          <a href="#" @click.prevent="showFooterInfo('Terms of Service')">Terms of Service</a>
-          <a href="#" @click.prevent="showFooterInfo('Contact Us')">Contact Us</a>
+          <router-link to="/terms">Terms of Service</router-link>
+          <router-link to="/privacy">Privacy Policy</router-link>
+          <router-link to="/contact">Contact Us</router-link>
         </nav>
         <p class="footer-copyright">© 2026 YayTopup. All rights reserved.</p>
       </div>
