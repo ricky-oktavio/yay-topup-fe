@@ -366,8 +366,15 @@ const showFooterInfo = (title) => {
 }
 
 .footer-logo {
-  font-size: 1.35rem;
-  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.footer-emblem-clean {
+  height: 28px;
+  width: auto;
+  object-fit: contain;
 }
 
 .brand-yay {

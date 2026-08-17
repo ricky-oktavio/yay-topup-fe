@@ -55,7 +55,7 @@ export const useTopupStore = defineStore('topup', {
 
   actions: {
     // Auth actions
-    loginUser(userData = { name: 'User' }) {
+    loginUser(userData = { name: 'User', role: 'user' }) {
       this.isLoggedIn = true;
       this.user = userData;
     },

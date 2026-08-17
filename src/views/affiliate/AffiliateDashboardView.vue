@@ -1,5 +1,12 @@
 <template>
   <div class="affiliate-dashboard-wrapper">
+    <!-- Momolive Background Shadow & Glow Layer -->
+    <div class="momolive-bg-glow">
+      <div class="glow-orb orb-1"></div>
+      <div class="glow-orb orb-2"></div>
+      <img src="../../assets/momolive_bg.jpg" alt="Momolive Background Glow" class="momolive-bg-image" />
+    </div>
+
     <!-- Affiliate Navbar -->
     <AffiliateNavbar />
 
@@ -52,7 +59,7 @@
             <div class="ref-code-value">{{ referralCode }}</div>
             <button class="btn-copy-code" @click="copyReferralCode">
               <Copy01Icon :size="16" />
-              <span>Copy Code</span>
+              <span>Copy Referral Link</span>
             </button>
           </div>
         </div>
@@ -236,8 +243,9 @@ const commissionHistory = ref([
 
 // Copy Code Handler
 const copyReferralCode = () => {
-  navigator.clipboard.writeText(referralCode.value);
-  store.showToast(`Kode referral ${referralCode.value} berhasil disalin!`, 'success');
+  const fullUrl = `${window.location.origin}/?ref=${referralCode.value}`;
+  navigator.clipboard.writeText(fullUrl);
+  store.showToast(`Link referral ${fullUrl} berhasil disalin!`, 'success');
 };
 
 // Handle Withdraw Submission
@@ -283,15 +291,66 @@ const showFooterNotice = (title) => {
 
 <style scoped>
 .affiliate-dashboard-wrapper {
+  position: relative;
   min-height: 100vh;
   background-color: #f8fafc;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
   color: #1e293b;
+  overflow: hidden;
+}
+
+.momolive-bg-glow {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
+  opacity: 0.85;
+}
+
+.momolive-bg-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center center;
+  filter: blur(3px) opacity(0.35);
+  transform: scale(1.02);
+}
+
+.glow-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(90px);
+  opacity: 0.45;
+}
+
+.orb-1 {
+  width: 450px;
+  height: 450px;
+  background: radial-gradient(circle, rgba(124, 77, 255, 0.35) 0%, rgba(236, 72, 153, 0) 70%);
+  top: -120px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.orb-2 {
+  width: 400px;
+  height: 400px;
+  background: radial-gradient(circle, rgba(236, 72, 153, 0.3) 0%, rgba(124, 77, 255, 0) 70%);
+  bottom: 5%;
+  right: -50px;
 }
 
 .affiliate-main-content {
+  position: relative;
+  z-index: 1;
   flex: 1;
   padding: 2.5rem 0 4rem 0;
 }

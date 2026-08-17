@@ -55,13 +55,22 @@
 
           <!-- Field 2: KODE REFERRAL -->
           <div class="form-group margin-top-md">
-            <label class="form-label-uppercase">KODE REFERRAL</label>
-            <input 
-              v-model="referralCode" 
-              type="text" 
-              class="form-input-styled" 
-              placeholder="Masukkan kode referral (opsional)"
-            />
+            <label class="form-label-uppercase">KODE REFERRAL (OPTIONAL)</label>
+            <div class="input-verified-flex-row">
+              <input 
+                v-model="referralCode" 
+                type="text" 
+                class="form-input-styled flex-input" 
+                :class="{ 'is-disabled-ref': isRefFromUrl }"
+                :disabled="isRefFromUrl"
+                placeholder="Masukkan kode referral (opsional)"
+              />
+              <div v-if="isRefFromUrl" class="side-verified-chip ref-locked-chip">
+                <CheckmarkBadge01Icon :size="16" />
+                <span>Referral Terpasang</span>
+              </div>
+            </div>
+            <span v-if="isRefFromUrl" class="ref-locked-hint">✨ Kode referral mitra diterapkan otomatis via link khusus.</span>
           </div>
 
           <!-- Field 3: NOMINAL KOIN -->
@@ -140,18 +149,28 @@
 </template>
 
 <script setup>
-import { ref, computed, watch } from 'vue';
-import { useRouter } from 'vue-router';
+import { ref, computed, watch, onMounted } from 'vue';
+import { useRouter, useRoute } from 'vue-router';
 import { Coins01Icon, ArrowRight01Icon, CheckmarkBadge01Icon, CheckmarkCircle01Icon, Loading01Icon } from 'hugeicons-vue';
 import { useTopupStore } from '../stores/topupStore';
 
 const router = useRouter();
+const route = useRoute();
 const store = useTopupStore();
 
 const momocoinId = ref('');
 const referralCode = ref('');
 const coinAmount = ref(0);
 const isLoading = ref(false);
+const isRefFromUrl = ref(false);
+
+onMounted(() => {
+  if (route.query.ref) {
+    referralCode.value = route.query.ref.toString();
+    isRefFromUrl.value = true;
+    store.showToast(`Kode referral mitra "${route.query.ref}" terpasang otomatis!`, 'success');
+  }
+});
 
 // Interactive Account Verification with Loading Animation
 const isCheckingUser = ref(false);
@@ -417,6 +436,39 @@ const showFooterInfo = (title) => {
 .side-verified-chip .verified-name {
   color: #065f46;
   font-weight: 700;
+}
+
+.side-verified-chip .verified-tag {
+  background: #10b981;
+  color: #ffffff;
+  font-size: 0.65rem;
+  padding: 0.1rem 0.4rem;
+  border-radius: 4px;
+  margin-left: 0.2rem;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+.form-input-styled.is-disabled-ref {
+  background-color: #f1f5f9;
+  color: #334155;
+  cursor: not-allowed;
+  border-color: #cbd5e1;
+  font-weight: 700;
+}
+
+.ref-locked-chip {
+  background: #ecfdf5;
+  border-color: #a7f3d0;
+  color: #059669;
+}
+
+.ref-locked-hint {
+  font-size: 0.775rem;
+  color: #059669;
+  font-weight: 600;
+  margin-top: 0.35rem;
+  display: block;
 }
 
 .side-verified-chip .verified-pill {

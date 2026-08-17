@@ -75,6 +75,44 @@
             </button>
           </form>
 
+          <!-- Quick Demo Mockup Accounts Box -->
+          <div class="demo-accounts-card margin-top-lg">
+            <div class="demo-header">
+              <span class="demo-badge">UJI COBA DEMO</span>
+              <span class="demo-title">Pilih Akun Mockup untuk Tes Instant:</span>
+            </div>
+            
+            <div class="demo-buttons-grid">
+              <!-- Demo Admin -->
+              <button 
+                type="button" 
+                class="demo-account-btn admin-btn" 
+                @click="fillDemoAccount('admin')"
+                title="Klik untuk tes login sebagai Admin"
+              >
+                <span class="role-icon">👑</span>
+                <div class="role-info">
+                  <strong class="role-title">Admin YayTopup</strong>
+                  <span class="role-email">admin@yaytopup.com</span>
+                </div>
+              </button>
+
+              <!-- Demo Partner Affiliate -->
+              <button 
+                type="button" 
+                class="demo-account-btn partner-btn" 
+                @click="fillDemoAccount('affiliate')"
+                title="Klik untuk tes login sebagai Partner Affiliate"
+              >
+                <span class="role-icon">🤝</span>
+                <div class="role-info">
+                  <strong class="role-title">Partner Affiliate</strong>
+                  <span class="role-email">partner@yaytopup.com</span>
+                </div>
+              </button>
+            </div>
+          </div>
+
           <!-- Register / Affiliate Footer Link -->
           <div class="login-card-footer">
             <span class="muted-text">Belum punya akun?</span>
@@ -115,16 +153,39 @@ const password = ref('');
 const showPassword = ref(false);
 const isSubmitting = ref(false);
 
+const fillDemoAccount = (role) => {
+  if (role === 'admin') {
+    email.value = 'admin@yaytopup.com';
+    password.value = 'admin123';
+    store.loginUser({ email: email.value, name: 'Admin YayTopup', role: 'admin' });
+    store.showToast('Berhasil login sebagai Admin YayTopup!', 'success');
+    router.push('/admin/products');
+  } else {
+    email.value = 'partner@yaytopup.com';
+    password.value = 'partner123';
+    store.loginUser({ email: email.value, name: 'Partner Affiliate', role: 'affiliate' });
+    store.showToast('Berhasil login sebagai Partner Affiliate!', 'success');
+    router.push('/affiliate/dashboard');
+  }
+};
+
 const handleLoginSubmit = () => {
   if (!email.value || !password.value) return;
 
   isSubmitting.value = true;
   setTimeout(() => {
     isSubmitting.value = false;
-    const username = email.value.split('@')[0];
-    store.loginUser({ email: email.value, name: username });
-    store.showToast(`Selamat datang kembali, ${username}!`, 'success');
-    router.push('/');
+    const lower = email.value.toLowerCase();
+    
+    if (lower.includes('admin')) {
+      store.loginUser({ email: email.value, name: 'Admin YayTopup', role: 'admin' });
+      store.showToast('Selamat datang Admin YayTopup!', 'success');
+      router.push('/admin/products');
+    } else {
+      store.loginUser({ email: email.value, name: 'Partner Affiliate', role: 'affiliate' });
+      store.showToast('Selamat datang Partner Affiliate!', 'success');
+      router.push('/affiliate/dashboard');
+    }
   }, 500);
 };
 
@@ -297,6 +358,97 @@ const showFooterInfo = (title) => {
 
 .toggle-eye-btn:hover {
   color: #7c3aed;
+}
+
+/* Quick Demo Mockup Accounts Styling */
+.demo-accounts-card {
+  background: #f8fafc;
+  border: 1px dashed #cbd5e1;
+  border-radius: 14px;
+  padding: 1rem 1.15rem;
+  margin-top: 1.5rem;
+}
+
+.demo-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.85rem;
+}
+
+.demo-badge {
+  background: #7c3aed;
+  color: #ffffff;
+  font-size: 0.65rem;
+  font-weight: 800;
+  padding: 0.15rem 0.45rem;
+  border-radius: 4px;
+  letter-spacing: 0.05em;
+}
+
+.demo-title {
+  font-size: 0.825rem;
+  font-weight: 700;
+  color: #334155;
+}
+
+.demo-buttons-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.demo-account-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.6rem 0.85rem;
+  border-radius: 10px;
+  border: 1px solid #e2e8f0;
+  background: #ffffff;
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.demo-account-btn:hover {
+  transform: translateX(3px);
+}
+
+.user-btn:hover {
+  border-color: #3b82f6;
+  background: #eff6ff;
+}
+
+.admin-btn:hover {
+  border-color: #7c3aed;
+  background: #f5f3ff;
+}
+
+.partner-btn:hover {
+  border-color: #10b981;
+  background: #ecfdf5;
+}
+
+.role-icon {
+  font-size: 1.2rem;
+}
+
+.role-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.role-title {
+  font-size: 0.825rem;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.role-email {
+  font-size: 0.75rem;
+  color: #64748b;
+  font-family: monospace;
 }
 
 .login-card-footer {
