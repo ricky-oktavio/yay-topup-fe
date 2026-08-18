@@ -37,7 +37,7 @@ yaytopup/
 │   │   ├── axiosClient.js         # Interceptor Request/Response
 │   │   └── topupService.js        # API Endpoint Integration
 │   ├── assets/                    # Gambar & Aset Visual Transparan
-│   │   ├── logo_concept_2.png     # Logo Transparan Emblem 3D
+│   │   ├── logo-yay.jpeg          # Logo Utama Platform YayTopup
 │   │   └── momolive_bg.jpg        # Backdrop Momolive Glow
 │   ├── components/
 │   │   ├── common/                # Komponen Shared (Global)

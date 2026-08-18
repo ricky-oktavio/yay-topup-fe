@@ -169,7 +169,7 @@
     <footer class="admin-footer">
       <div class="admin-container footer-inner">
         <div class="footer-left">
-          <img src="../../assets/logo_concept_2.png" alt="YayTopup Logo" class="footer-logo-clean" />
+          <img src="../../assets/logo-yay-clean.png" alt="YayTopup Logo" class="footer-logo-clean" />
         </div>
         <div class="footer-center">
           © 2026 PT. JLIMA DIGITAL INDONESIA. All rights reserved.

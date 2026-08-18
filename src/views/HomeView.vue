@@ -8,10 +8,17 @@
     </div>
 
     <div class="container main-content-wrapper animate-fade-up">
-      <!-- Title & Subtitle Section -->
+      <!-- Title & Subtitle Section with Official Momolive Logo -->
       <div class="hero-header">
-        <h1 class="main-title">Top Up Momocoin</h1>
-        <p class="main-subtitle">Isi saldo Momocoin dengan cepat & aman</p>
+        <div class="hero-title-flex">
+          <a href="https://www.momoindo.com/?lng=id" target="_blank" rel="noopener noreferrer" class="momolive-logo-badge" title="Kunjungi Website Resmi Momo Live">
+            <img src="../assets/momo.jpeg" alt="Momo Live Logo" class="momolive-hero-logo" />
+          </a>
+          <div class="hero-title-group">
+            <h1 class="main-title">Top Up Momocoin</h1>
+            <p class="main-subtitle">Isi saldo Momocoin dengan cepat & aman</p>
+          </div>
+        </div>
       </div>
 
       <!-- Main Topup Card -->
@@ -135,7 +142,7 @@
     <footer class="momolive-footer">
       <div class="container footer-inner">
         <div class="footer-logo">
-          <img src="../assets/logo_concept_2.png" alt="YayTopup Logo" class="footer-emblem-clean" />
+          <img src="../assets/logo-yay-clean.png" alt="YayTopup Logo" class="footer-emblem-clean" />
           <span class="brand-text">
             <span class="brand-yay">Yay</span><span class="brand-topup">Topup</span>
           </span>
@@ -318,6 +325,47 @@ const showFooterInfo = (title) => {
   margin-bottom: 2.25rem;
 }
 
+.hero-title-flex {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1.25rem;
+  text-align: left;
+}
+
+.momolive-logo-badge {
+  width: 64px;
+  height: 64px;
+  border-radius: 18px;
+  padding: 4px;
+  background: linear-gradient(135deg, #7c3aed 0%, #ec4899 100%);
+  box-shadow: 
+    0 8px 24px -2px rgba(124, 58, 237, 0.35),
+    0 4px 12px -1px rgba(236, 72, 153, 0.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  text-decoration: none;
+}
+
+.hero-title-flex:hover .momolive-logo-badge {
+  transform: scale(1.08) rotate(3deg);
+}
+
+.momolive-hero-logo {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 14px;
+}
+
+.hero-title-group {
+  display: flex;
+  flex-direction: column;
+}
+
 .main-title {
   font-size: 2.75rem;
   font-weight: 800;
@@ -329,8 +377,16 @@ const showFooterInfo = (title) => {
 .main-subtitle {
   font-size: 1.05rem;
   color: #6b7280;
-  margin-top: 0.5rem;
+  margin-top: 0.25rem;
   font-weight: 500;
+}
+
+@media (max-width: 640px) {
+  .hero-title-flex {
+    flex-direction: column;
+    text-align: center;
+    gap: 0.75rem;
+  }
 }
 
 .topup-card-container {

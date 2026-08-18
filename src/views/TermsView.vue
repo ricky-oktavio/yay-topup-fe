@@ -94,7 +94,7 @@
     <footer class="momolive-footer">
       <div class="container footer-inner">
         <div class="footer-logo">
-          <img src="../assets/logo_concept_2.png" alt="YayTopup Logo" class="footer-emblem-clean" />
+          <img src="../assets/logo-yay-clean.png" alt="YayTopup Logo" class="footer-emblem-clean" />
         </div>
         <nav class="footer-links">
           <router-link to="/terms">Terms of Service</router-link>

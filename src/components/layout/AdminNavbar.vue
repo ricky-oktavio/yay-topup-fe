@@ -3,7 +3,7 @@
     <div class="admin-nav-container">
       <!-- Admin Brand Logo -->
       <router-link to="/" class="admin-brand-logo" title="YayTopup Home">
-        <img src="../../assets/logo_concept_2.png" alt="YayTopup Admin" class="admin-logo-img" />
+        <img src="../../assets/logo-yay-clean.png" alt="YayTopup Admin" class="admin-logo-img" />
         <span class="brand-text">
           <span class="brand-yay">Yay</span><span class="brand-topup">Topup</span>
           <span class="admin-pill-badge">ADMIN</span>
@@ -84,10 +84,26 @@ const handleLogout = () => {
 }
 
 .admin-logo-img {
-  height: 36px;
-  width: auto;
+  height: 38px;
+  width: 38px;
   object-fit: contain;
-  filter: drop-shadow(0 2px 6px rgba(124, 58, 237, 0.22));
+  padding: 3px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #1e1b4b 0%, #0f172a 100%);
+  box-shadow: 
+    0 4px 14px rgba(15, 23, 42, 0.35),
+    0 2px 8px rgba(124, 58, 237, 0.3),
+    inset 0 0 0 1px rgba(139, 92, 246, 0.35);
+  image-rendering: -webkit-optimize-contrast;
+  transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.admin-brand-logo:hover .admin-logo-img {
+  transform: translateY(-1px) scale(1.06);
+  box-shadow: 
+    0 6px 20px rgba(124, 58, 237, 0.45),
+    0 3px 10px rgba(15, 23, 42, 0.4),
+    inset 0 0 0 1px rgba(192, 132, 252, 0.5);
 }
 
 .brand-text {
