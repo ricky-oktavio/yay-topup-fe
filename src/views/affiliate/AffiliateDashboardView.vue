@@ -171,7 +171,7 @@
     <footer class="affiliate-footer">
       <div class="affiliate-container footer-inner">
         <div class="footer-left">
-          © 2026 YayTopup. All rights reserved.
+          © 2026 PT. JLIMA DIGITAL INDONESIA. All rights reserved.
         </div>
         <div class="footer-right">
           <router-link to="/terms">Terms of Service</router-link>

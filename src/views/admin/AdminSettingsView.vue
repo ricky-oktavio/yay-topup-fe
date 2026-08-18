@@ -51,6 +51,18 @@
                 />
               </div>
 
+              <!-- Field 3: Kredensial Perusahaan -->
+              <div class="form-group margin-top-lg">
+                <label class="form-label-styled">Nama Kredensial Perusahaan</label>
+                <input 
+                  v-model="companyCredentials" 
+                  type="text" 
+                  required 
+                  class="form-input-styled" 
+                  placeholder="PT. JLIMA DIGITAL INDONESIA" 
+                />
+              </div>
+
               <!-- Submit Button -->
               <button 
                 type="submit" 
@@ -71,7 +83,7 @@
     <footer class="admin-footer">
       <div class="admin-container footer-inner">
         <div class="footer-left">
-          © 2026 YayTopup. All rights reserved.
+          © 2026 PT. JLIMA DIGITAL INDONESIA. All rights reserved.
         </div>
         <div class="footer-right">
           <router-link to="/contact">Support</router-link>
@@ -91,6 +103,7 @@ const store = useTopupStore();
 
 const globalCommissionRate = ref(5);
 const minWithdrawalAmount = ref(50000);
+const companyCredentials = ref('PT. JLIMA DIGITAL INDONESIA');
 const isSaving = ref(false);
 
 const handleSaveSettings = () => {

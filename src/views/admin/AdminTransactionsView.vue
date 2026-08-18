@@ -113,7 +113,7 @@
     <footer class="admin-footer">
       <div class="admin-container footer-inner">
         <div class="footer-left font-bold text-dark">
-          © 2026 YayTopup Admin. All rights reserved.
+          © 2026 PT. JLIMA DIGITAL INDONESIA. All rights reserved.
         </div>
         <div class="footer-right">
           <router-link to="/contact">Support</router-link>

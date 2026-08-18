@@ -99,7 +99,7 @@
           <router-link to="/privacy">Privacy Policy</router-link>
           <router-link to="/contact">Contact Us</router-link>
         </nav>
-        <p class="footer-copyright">© 2026 YayTopup. All rights reserved.</p>
+        <p class="footer-copyright">© 2026 PT. JLIMA DIGITAL INDONESIA. All rights reserved.</p>
       </div>
     </footer>
   </div>
