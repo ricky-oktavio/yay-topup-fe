@@ -78,8 +78,8 @@
           <!-- Quick Demo Mockup Accounts Box -->
           <div class="demo-accounts-card margin-top-lg">
             <div class="demo-header">
-              <span class="demo-badge">UJI COBA DEMO</span>
-              <span class="demo-title">Pilih Akun Mockup untuk Tes Instant:</span>
+              <span class="demo-badge">AKUN DEMO</span>
+              <span class="demo-title">Pilih Akun Cepat untuk Pengujian:</span>
             </div>
             
             <div class="demo-buttons-grid">
@@ -88,9 +88,8 @@
                 type="button" 
                 class="demo-account-btn admin-btn" 
                 @click="fillDemoAccount('admin')"
-                title="Klik untuk tes login sebagai Admin"
+                title="Login sebagai Admin"
               >
-                <span class="role-icon">👑</span>
                 <div class="role-info">
                   <strong class="role-title">Admin YayTopup</strong>
                   <span class="role-email">admin@yaytopup.com</span>
@@ -102,11 +101,10 @@
                 type="button" 
                 class="demo-account-btn partner-btn" 
                 @click="fillDemoAccount('affiliate')"
-                title="Klik untuk tes login sebagai Partner Affiliate"
+                title="Login sebagai Mitra Affiliate"
               >
-                <span class="role-icon">🤝</span>
                 <div class="role-info">
-                  <strong class="role-title">Partner Affiliate</strong>
+                  <strong class="role-title">Mitra Affiliate</strong>
                   <span class="role-email">partner@yaytopup.com</span>
                 </div>
               </button>

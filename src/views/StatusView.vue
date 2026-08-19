@@ -36,7 +36,7 @@
             :disabled="isSearching"
             @click="handleCheckStatus"
           >
-            <span v-if="isSearching">⏳ Mencari...</span>
+            <span v-if="isSearching">Mengecek Status...</span>
             <span v-else>Cek Status</span>
           </button>
 

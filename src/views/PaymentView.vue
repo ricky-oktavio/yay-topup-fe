@@ -124,7 +124,7 @@
           :disabled="isProcessing"
           @click="handleConfirmPayment"
         >
-          <span v-if="isProcessing">⏳ Memproses Pembayaran API...</span>
+          <span v-if="isProcessing">Memproses Pembayaran...</span>
           <span v-else>Bayar Sekarang</span>
         </button>
       </div>
@@ -133,7 +133,7 @@
       <div v-if="showQrisModal" class="modal-backdrop" @click.self="showQrisModal = false">
         <div class="modal-card animate-fade-up">
           <button class="modal-close-btn" @click="showQrisModal = false">&times;</button>
-          <div class="modal-pill">📱 QRIS PAYMENT</div>
+          <div class="modal-pill">PEMBAYARAN QRIS</div>
           <h2>Pembayaran {{ getMethodLabel(selectedMethod) }}</h2>
           <p class="modal-desc">Scan kode QR di bawah menggunakan aplikasi e-wallet / m-banking Anda.</p>
 

@@ -2,24 +2,23 @@
   <div class="history-page container animate-fade-in">
     <div class="page-header">
       <div>
-        <h1 class="page-title">Riwayat Transaksi API</h1>
-        <p class="page-desc">Daftar transaksi topup yang diproses melalui API YayTopup.</p>
+        <h1 class="page-title">Riwayat Transaksi</h1>
+        <p class="page-desc">Daftar transaksi top up yang telah diproses.</p>
       </div>
 
       <button class="btn btn-secondary btn-sm" @click="store.fetchTransactionHistory()">
-        🔄 Refresh Data
+        Refresh Data
       </button>
     </div>
 
     <!-- Search / Filter Bar -->
     <div class="filter-bar glass-card">
       <div class="search-box">
-        <span class="search-icon">🔍</span>
         <input 
           v-model="searchQuery" 
           type="text" 
           class="form-input search-input" 
-          placeholder="Cari No. Referensi, ID Transaksi, atau Nama Game..."
+          placeholder="Cari No. Referensi, ID Transaksi, atau Layanan..."
         />
       </div>
 
@@ -50,7 +49,7 @@
 
     <!-- Loading State -->
     <div v-if="store.isLoadingHistory" class="loading-box glass-card">
-      <p>Memuat riwayat transaksi dari API...</p>
+      <p>Memuat riwayat transaksi...</p>
     </div>
 
     <!-- History List -->
@@ -88,18 +87,17 @@
         </div>
 
         <div class="trx-footer">
-          <span class="ref-label">No. Referensi API:</span>
+          <span class="ref-label">No. Referensi:</span>
           <code class="ref-code">{{ trx.referenceNo }}</code>
-          <button class="copy-btn" @click="copyRef(trx.referenceNo)">📋 Salin</button>
+          <button class="copy-btn" @click="copyRef(trx.referenceNo)">Salin</button>
         </div>
       </div>
     </div>
 
     <!-- Empty State -->
     <div v-else class="empty-box glass-card">
-      <span class="empty-icon">📜</span>
       <h3>Belum ada riwayat transaksi</h3>
-      <p>Lakukan transaksi topup untuk melihat catatan di sini.</p>
+      <p>Lakukan transaksi untuk melihat catatan di sini.</p>
     </div>
   </div>
 </template>
