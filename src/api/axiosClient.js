@@ -1,7 +1,7 @@
 import axios from 'axios';
 
-// Read configuration from environment variables (defaults to '/api/v1' for Vite proxy or direct relative path)
-const baseURL = import.meta.env.VITE_API_BASE_URL || '/api/v1';
+// Read configuration from environment variables (defaults to live REST API)
+const baseURL = import.meta.env.VITE_API_BASE_URL || 'https://api.yaytopup.my.id/api/v1';
 const timeout = Number(import.meta.env.VITE_API_TIMEOUT) || 15000;
 
 // Create Axios Instance

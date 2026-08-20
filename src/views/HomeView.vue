@@ -265,7 +265,11 @@
                 </div>
 
                 <!-- Package Grid -->
-                <div class="v2-packages-grid">
+                <div v-if="packagesList.length === 0" class="v2-loading-box">
+                  <Loading01Icon :size="24" class="spin-icon" />
+                  <span>Memuat daftar paket koin resmi...</span>
+                </div>
+                <div v-else class="v2-packages-grid">
                   <div 
                     v-for="pkg in packagesList" 
                     :key="pkg.id"
@@ -279,7 +283,7 @@
                     <div v-if="pkg.isFeatured" class="v2-featured-tag">TERLARIS</div>
                     <div class="v2-pkg-left">
                       <h3 class="v2-pkg-name">{{ pkg.name }}</h3>
-                      <p v-if="pkg.bonus > 0" class="v2-pkg-bonus">Bonus {{ pkg.bonus }}</p>
+                      <p v-if="pkg.bonus > 0" class="v2-pkg-bonus">Bonus {{ pkg.bonus.toLocaleString('id-ID') }}</p>
                       <p class="v2-pkg-price">Rp {{ pkg.price.toLocaleString('id-ID') }}</p>
                     </div>
                     <div class="v2-pkg-thumb">
@@ -530,34 +534,40 @@
               </div>
 
               <!-- Packages Grid (Clean Light Card Design) -->
-              <div v-if="denomMode === 'packages'" class="v3-packages-grid">
-                <div 
-                  v-for="pkg in v3Packages" 
-                  :key="pkg.id"
-                  class="v3-pkg-card"
-                  :class="{ 
-                    active: selectedPackage?.id === pkg.id,
-                    featured: pkg.isFeatured 
-                  }"
-                  @click="selectPackage(pkg)"
-                >
-                  <div v-if="pkg.badge" class="v3-pkg-badge">{{ pkg.badge }}</div>
-                  <div class="v3-pkg-inner">
-                    <div class="v3-pkg-left-info">
-                      <div class="v3-pkg-top-row">
-                        <img src="../assets/momo.jpeg" alt="Momo Coin" class="v3-coin-avatar" />
-                        <h3 class="v3-pkg-title">{{ pkg.name }}</h3>
+              <div v-if="denomMode === 'packages'">
+                <div v-if="v3Packages.length === 0" class="v3-loading-box">
+                  <Loading01Icon :size="24" class="spin-icon" />
+                  <span>Memuat daftar paket koin resmi...</span>
+                </div>
+                <div v-else class="v3-packages-grid">
+                  <div 
+                    v-for="pkg in v3Packages" 
+                    :key="pkg.id"
+                    class="v3-pkg-card"
+                    :class="{ 
+                      active: selectedPackage?.id === pkg.id,
+                      featured: pkg.isFeatured 
+                    }"
+                    @click="selectPackage(pkg)"
+                  >
+                    <div v-if="pkg.badge" class="v3-pkg-badge">{{ pkg.badge }}</div>
+                    <div class="v3-pkg-inner">
+                      <div class="v3-pkg-left-info">
+                        <div class="v3-pkg-top-row">
+                          <img src="../assets/momo.jpeg" alt="Momo Coin" class="v3-coin-avatar" />
+                          <h3 class="v3-pkg-title">{{ pkg.name }}</h3>
+                        </div>
+                        <div v-if="pkg.bonus > 0" class="v3-pkg-bonus">+Bonus {{ pkg.bonus.toLocaleString('id-ID') }} Koin</div>
+                        <div class="v3-pkg-price">Rp {{ pkg.price.toLocaleString('id-ID') }}</div>
                       </div>
-                      <div v-if="pkg.bonus > 0" class="v3-pkg-bonus">+Bonus {{ pkg.bonus.toLocaleString('id-ID') }} Koin</div>
-                      <div class="v3-pkg-price">Rp {{ pkg.price.toLocaleString('id-ID') }}</div>
+                      <div class="v3-pkg-thumb-wrap">
+                        <img src="../assets/momo.jpeg" alt="Momo Coin" class="v3-thumb-img" />
+                      </div>
                     </div>
-                    <div class="v3-pkg-thumb-wrap">
-                      <img src="../assets/momo.jpeg" alt="Momo Coin" class="v3-thumb-img" />
+                    
+                    <div class="v3-pkg-check">
+                      <CheckmarkCircle01Icon :size="20" />
                     </div>
-                  </div>
-                  
-                  <div class="v3-pkg-check">
-                    <CheckmarkCircle01Icon :size="20" />
                   </div>
                 </div>
               </div>
@@ -853,31 +863,9 @@ const selectedPaymentCode = ref('qris');
 const expandedCategory = ref('qris');
 const showConfirmModal = ref(false);
 
-// Packages List for V2
-const packagesList = ref([
-  { id: 1, name: 'Coin 10000', bonus: 0, price: 10000, coins: 10000, isFeatured: false },
-  { id: 2, name: 'Coin 20000', bonus: 0, price: 20000, coins: 20000, isFeatured: false },
-  { id: 3, name: 'Coin 30000', bonus: 0, price: 30000, coins: 30000, isFeatured: false },
-  { id: 4, name: 'Coin 50000', bonus: 0, price: 50000, coins: 50000, isFeatured: false },
-  { id: 5, name: 'Coin 100000', bonus: 0, price: 100000, coins: 100000, isFeatured: false },
-  { id: 6, name: 'Coin 200000', bonus: 0, price: 200000, coins: 200000, isFeatured: false },
-  { id: 7, name: 'Coin 250000', bonus: 0, price: 250000, coins: 250000, isFeatured: false },
-  { id: 8, name: 'Coin 300000', bonus: 0, price: 300000, coins: 300000, isFeatured: false },
-  { id: 9, name: 'Coin 350000', bonus: 3500, price: 350000, coins: 350000, isFeatured: true },
-  { id: 10, name: 'Coin 400000', bonus: 4000, price: 400000, coins: 400000, isFeatured: false },
-  { id: 11, name: 'Coin 450000', bonus: 4500, price: 450000, coins: 450000, isFeatured: false },
-  { id: 12, name: 'Coin 500000', bonus: 5000, price: 500000, coins: 500000, isFeatured: false }
-]);
-
-// Clean V3 Packages List
-const v3Packages = ref([
-  { id: 1, name: '1.000 Coins', bonus: 0, price: 100000, coins: 1000, badge: 'TERLARIS' },
-  { id: 2, name: '5.000 Coins', bonus: 250, price: 500000, coins: 5000, badge: 'POPULER', isFeatured: true },
-  { id: 3, name: '10.000 Coins', bonus: 1000, price: 1000000, coins: 10000, badge: 'REKOMENDASI' },
-  { id: 4, name: '25.000 Coins', bonus: 2500, price: 2500000, coins: 25000, badge: '' },
-  { id: 5, name: '50.000 Coins', bonus: 5000, price: 5000000, coins: 50000, badge: 'PROMO' },
-  { id: 6, name: '100.000 Coins', bonus: 12000, price: 10000000, coins: 100000, badge: 'VIP' }
-]);
+// Packages List initialized empty - 100% full live data from API
+const packagesList = ref([]);
+const v3Packages = ref([]);
 
 const paymentCategories = [
   {
@@ -1422,6 +1410,32 @@ const proceedCheckout = async () => {
 .v3-mode-btn.active { background: #ffffff; color: #7c3aed; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08); }
 
 .v3-packages-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 1rem; }
+
+.v3-loading-box, .v2-loading-box {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  padding: 3rem 1.5rem;
+  background: #ffffff;
+  border: 1.5px dashed #cbd5e1;
+  border-radius: 16px;
+  color: #64748b;
+  font-weight: 700;
+  font-size: 0.95rem;
+}
+.v2-loading-box {
+  background: rgba(0, 0, 0, 0.15);
+  border-color: rgba(255, 255, 255, 0.3);
+  color: #ffffff;
+}
+.spin-icon {
+  animation: spin 1s linear infinite;
+}
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
 
 .v3-pkg-card {
   position: relative; background: #ffffff; border: 1.5px solid #e2e8f0;

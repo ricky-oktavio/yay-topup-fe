@@ -265,18 +265,22 @@ const loadProducts = async () => {
   isLoading.value = true;
   try {
     const res = await adminService.getProducts();
-    if (res?.data) {
-      products.value = res.data.map(p => ({
-        id: p.id,
-        name: p.name,
-        providerCode: p.provider_code || p.providerCode || '',
-        basePrice: Number(p.base_price || p.basePrice || 0),
-        sellingPrice: Number(p.selling_price || p.sellingPrice || 0),
-        status: p.status || 'active'
-      }));
-    } else {
-      products.value = [];
-    }
+    const list = Array.isArray(res) 
+      ? res 
+      : (Array.isArray(res?.data) 
+          ? res.data 
+          : (Array.isArray(res?.data?.products) 
+              ? res.data.products 
+              : (Array.isArray(res?.data?.data) ? res.data.data : [])));
+
+    products.value = list.map(p => ({
+      id: p.id,
+      name: p.name,
+      providerCode: p.provider_code || p.providerCode || '',
+      basePrice: Number(p.base_price || p.basePrice || 0),
+      sellingPrice: Number(p.selling_price || p.sellingPrice || 0),
+      status: p.status || 'active'
+    }));
   } catch (err) {
     store.showToast(err.message || 'Gagal memuat produk dari server', 'error');
     products.value = [];
