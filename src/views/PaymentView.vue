@@ -192,10 +192,10 @@ const orderDetails = computed(() => {
     return storeOrder;
   }
   return {
-    momocoinId: '123456789',
+    momocoinId: '',
     referralCode: '-',
-    coinAmount: 1000,
-    totalPrice: 100000
+    coinAmount: 0,
+    totalPrice: 0
   };
 });
 
@@ -744,5 +744,29 @@ const showNotice = (title) => {
 .footer-copyright {
   font-size: 0.8rem;
   color: #94a3b8;
+}
+
+@media (max-width: 640px) {
+  .payment-content {
+    padding-top: 1.25rem;
+    padding-bottom: 2.5rem;
+    padding-left: 0.85rem;
+    padding-right: 0.85rem;
+  }
+  .header-page-title {
+    font-size: 1.25rem;
+  }
+  .card-box {
+    padding: 1.25rem 1rem;
+    border-radius: 16px;
+  }
+  .modal-card {
+    padding: 1.5rem 1.15rem;
+    border-radius: 16px;
+  }
+  .qr-box img {
+    max-width: 180px;
+    height: auto;
+  }
 }
 </style>

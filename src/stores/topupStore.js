@@ -1,42 +1,36 @@
 import { defineStore } from 'pinia';
 import { topupService } from '../api/topupService';
+import { authService } from '../api/authService';
 
 export const useTopupStore = defineStore('topup', {
   state: () => ({
     // Data states
-    categories: [],
-    productsByCategory: {},
-    currentProduct: null,
-    paymentMethods: [],
+    products: [],
     transactions: [],
     
     // Active Checkout Order State
     currentOrder: {
+      productId: '',
       momocoinId: '',
       referralCode: '',
       coinAmount: 0,
-      totalPrice: 0
+      totalPrice: 0,
+      invoiceUrl: '',
+      transactionId: '',
+      paymentMethod: 'QRIS',
+      whatsapp: ''
     },
     
     // Status states
-    isLoadingCategories: false,
     isLoadingProducts: false,
     isLoadingCheckout: false,
     isLoadingHistory: false,
-    apiStatus: {
-      connected: true,
-      mode: import.meta.env.VITE_USE_MOCK_API === 'true' ? 'MOCK' : 'LIVE',
-      lastChecked: null,
-      message: ''
-    },
-
+    isLoadingCheckId: false,
+    
     // User Auth & Session State
-    isLoggedIn: false,
-    user: null,
-
-    // User Balance / Points
-    userBalance: 250000,
-    userPoints: 1450,
+    isLoggedIn: !!localStorage.getItem('yaytopup_auth_token'),
+    user: JSON.parse(localStorage.getItem('yaytopup_user_data') || 'null'),
+    accessToken: localStorage.getItem('yaytopup_auth_token') || '',
 
     // Global Notification Toasts
     toast: {
@@ -47,24 +41,10 @@ export const useTopupStore = defineStore('topup', {
   }),
 
   getters: {
-    formattedBalance: (state) => {
-      return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(state.userBalance);
-    },
     transactionCount: (state) => state.transactions.length
   },
 
   actions: {
-    // Auth actions
-    loginUser(userData = { name: 'User', role: 'user' }) {
-      this.isLoggedIn = true;
-      this.user = userData;
-    },
-    logoutUser() {
-      this.isLoggedIn = false;
-      this.user = null;
-      this.showToast('Anda telah logout.', 'info');
-    },
-
     // Show Toast Notification
     showToast(message, type = 'info', duration = 3500) {
       this.toast.message = message;
@@ -77,106 +57,129 @@ export const useTopupStore = defineStore('topup', {
 
     // Set Active Order Details
     setCurrentOrder(orderData) {
-      this.currentOrder = { ...orderData };
+      this.currentOrder = { ...this.currentOrder, ...orderData };
     },
 
-    // Check API Status
-    async checkApiStatus() {
-      try {
-        const res = await topupService.checkHealth();
-        this.apiStatus.connected = true;
-        this.apiStatus.message = res.message || 'Connected to API';
-        this.apiStatus.lastChecked = new Date().toLocaleTimeString();
-      } catch (err) {
-        this.apiStatus.connected = false;
-        this.apiStatus.message = err.message || 'Failed to reach API';
-        this.apiStatus.lastChecked = new Date().toLocaleTimeString();
-      }
-    },
-
-    // Fetch Categories
-    async fetchCategories() {
-      this.isLoadingCategories = true;
-      try {
-        const res = await topupService.getCategories();
-        this.categories = res.data || [];
-      } catch (err) {
-        this.showToast(err.message || 'Gagal memuat kategori', 'error');
-      } finally {
-        this.isLoadingCategories = false;
-      }
-    },
-
-    // Fetch Products by Category ID
-    async fetchProductsByCategory(categoryId) {
-      if (this.productsByCategory[categoryId]) return; // cached
+    // Fetch Active Products from Live API
+    async fetchProducts() {
       this.isLoadingProducts = true;
       try {
-        const res = await topupService.getProductsByCategory(categoryId);
-        this.productsByCategory[categoryId] = res.data || [];
+        const res = await topupService.getProducts();
+        if (res && res.data && res.data.length > 0) {
+          this.products = res.data;
+        }
+        return res;
       } catch (err) {
-        this.showToast(err.message || 'Gagal memuat produk', 'error');
+        console.warn('[TopupStore] Could not fetch products from API, using fallback catalog', err);
       } finally {
         this.isLoadingProducts = false;
       }
     },
 
-    // Fetch Single Product Details
-    async fetchProductById(productId) {
-      this.isLoadingProducts = true;
+    // Check / Validate User ID via Live API
+    async checkUserId(userId, gameCode = 'momolive') {
+      if (!userId || userId.toString().trim().length < 3) return null;
+      this.isLoadingCheckId = true;
       try {
-        const res = await topupService.getProductById(productId);
-        this.currentProduct = res.data || null;
+        const res = await topupService.checkUserId({
+          game_code: gameCode,
+          user_id: userId.toString().trim()
+        });
+        return res;
       } catch (err) {
-        this.showToast(err.message || 'Produk tidak ditemukan', 'error');
-        this.currentProduct = null;
+        console.warn('[TopupStore] ID Validation response:', err);
+        return null;
       } finally {
-        this.isLoadingProducts = false;
+        this.isLoadingCheckId = false;
       }
     },
 
-    // Fetch Payment Methods
-    async fetchPaymentMethods() {
-      if (this.paymentMethods.length > 0) return;
-      try {
-        const res = await topupService.getPaymentMethods();
-        this.paymentMethods = res.data || [];
-      } catch (err) {
-        this.showToast(err.message || 'Gagal memuat metode pembayaran', 'error');
-      }
-    },
-
-    // Submit Top-up Order
-    async submitTopupOrder(payload) {
+    // Submit Checkout Order to Live API
+    async submitCheckout(payload) {
       this.isLoadingCheckout = true;
       try {
-        const res = await topupService.createTopupTransaction(payload);
-        if (res.success && res.data) {
-          // Prepend to transaction history
-          this.transactions.unshift(res.data);
-          this.showToast('Transaksi Berhasil! Top-up telah dikirim.', 'success');
-          return { success: true, transaction: res.data };
+        const res = await topupService.checkout({
+          product_id: payload.product_id || payload.productId,
+          target_user_id: payload.target_user_id || payload.momocoinId,
+          target_zone_id: payload.target_zone_id || '',
+          affiliate_code: payload.affiliate_code || payload.referralCode || undefined
+        });
+
+        if (res && res.data) {
+          const trx = res.data;
+          this.currentOrder.transactionId = trx.id || trx.transaction_id || '';
+          this.currentOrder.invoiceUrl = trx.invoice_url || trx.payment_url || '';
+          
+          // Prepend to local history
+          this.transactions.unshift({
+            id: trx.id || `TRX-${Date.now().toString().slice(-6)}`,
+            productName: trx.product_name || 'Momo Live Coin',
+            denominationLabel: `${this.currentOrder.coinAmount.toLocaleString('id-ID')} Koin`,
+            targetAccount: this.currentOrder.momocoinId,
+            paymentMethod: this.currentOrder.paymentMethod || 'QRIS',
+            amount: this.currentOrder.totalPrice,
+            status: trx.status || 'PENDING',
+            referenceNo: trx.reference_no || trx.id || `REF-${Date.now()}`,
+            createdAt: new Date().toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' }),
+            invoiceUrl: trx.invoice_url || ''
+          });
+
+          this.showToast('Pesanan berhasil dibuat. Silakan selesaikan pembayaran.', 'success');
+          return { success: true, data: trx };
         }
+
+        return { success: false, error: res };
       } catch (err) {
-        this.showToast(err.message || 'Transaksi gagal diproses', 'error');
+        this.showToast(err.message || 'Gagal memproses pesanan ke server', 'error');
         return { success: false, error: err };
       } finally {
         this.isLoadingCheckout = false;
       }
     },
 
-    // Fetch History
-    async fetchTransactionHistory() {
-      if (this.transactions.length > 0) return;
-      this.isLoadingHistory = true;
+    // Check Transaction Status from Live API
+    async getTransactionStatus(transactionId) {
       try {
-        const res = await topupService.getTransactionHistory();
-        this.transactions = res.data || [];
+        const res = await topupService.getTransactionStatus(transactionId);
+        return res;
       } catch (err) {
-        this.showToast(err.message || 'Gagal memuat riwayat transaksi', 'error');
-      } finally {
-        this.isLoadingHistory = false;
+        console.warn('[TopupStore] Failed to fetch transaction status', err);
+        return null;
       }
+    },
+
+    // User / Admin Login via Live API
+    async loginUser(credentials) {
+      try {
+        const res = await authService.login(credentials);
+        if (res && res.data) {
+          const { access_token, user } = res.data;
+          this.accessToken = access_token;
+          this.user = user || { email: credentials.email, role: 'admin' };
+          this.isLoggedIn = true;
+
+          localStorage.setItem('yaytopup_auth_token', access_token);
+          localStorage.setItem('yaytopup_user_data', JSON.stringify(this.user));
+          this.showToast('Login berhasil!', 'success');
+          return { success: true, user: this.user };
+        }
+        return { success: false, message: 'Response invalid' };
+      } catch (err) {
+        this.showToast(err.message || 'Email atau password salah', 'error');
+        return { success: false, error: err };
+      }
+    },
+
+    // Logout
+    logoutUser() {
+      this.isLoggedIn = false;
+      this.user = null;
+      this.accessToken = '';
+      localStorage.removeItem('yaytopup_auth_token');
+      localStorage.removeItem('yaytopup_user_data');
+      this.showToast('Anda telah logout.', 'info');
     }
   }
 });
+
+export default useTopupStore;

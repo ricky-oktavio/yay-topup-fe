@@ -197,19 +197,56 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted, watch } from 'vue';
 import AdminNavbar from '../../components/layout/AdminNavbar.vue';
 import { useTopupStore } from '../../stores/topupStore';
+import { adminService } from '../../api/adminService';
 
 const store = useTopupStore();
 
 const currentFilter = ref('all');
+const affiliates = ref([]);
+const isLoading = ref(false);
 
-const affiliates = ref([
-  { id: 1, name: 'Budi Santoso', email: 'budi@email.com', status: 'pending', referralCode: null, commissionRate: 5 },
-  { id: 2, name: 'Siti Aminah', email: 'siti@email.com', status: 'active', referralCode: 'SITI2024', commissionRate: 7 },
-  { id: 3, name: 'Andi Wijaya', email: 'andi@email.com', status: 'inactive', referralCode: 'ANDI99', commissionRate: 5 }
-]);
+const loadAffiliates = async () => {
+  isLoading.value = true;
+  try {
+    const params = {};
+    if (currentFilter.value !== 'all') {
+      params.status = currentFilter.value;
+    }
+    const res = await adminService.getAffiliates(params);
+    const list = Array.isArray(res) 
+      ? res 
+      : (Array.isArray(res?.data) 
+          ? res.data 
+          : (Array.isArray(res?.data?.affiliates) 
+              ? res.data.affiliates 
+              : (Array.isArray(res?.data?.data) ? res.data.data : [])));
+
+    affiliates.value = list.map(a => ({
+      id: a.id,
+      name: a.name || 'Partner',
+      email: a.email,
+      status: a.status || 'pending',
+      referralCode: a.referral_code || a.referralCode || null,
+      commissionRate: Number(a.commission_rate || a.commissionRate || 5)
+    }));
+  } catch (err) {
+    store.showToast(err.message || 'Gagal memuat data afiliasi', 'error');
+    affiliates.value = [];
+  } finally {
+    isLoading.value = false;
+  }
+};
+
+onMounted(() => {
+  loadAffiliates();
+});
+
+watch(currentFilter, () => {
+  loadAffiliates();
+});
 
 const filteredAffiliates = computed(() => {
   if (currentFilter.value === 'all') return affiliates.value;
@@ -221,15 +258,28 @@ const showModal = ref(false);
 const selectedAffiliate = ref(null);
 const editCommissionRate = ref(5);
 
-const approveAffiliate = (item) => {
-  item.status = 'active';
-  item.referralCode = item.name.substring(0, 4).toUpperCase() + '2026';
-  store.showToast(`Afiliasi ${item.name} berhasil disetujui!`, 'success');
+const approveAffiliate = async (item) => {
+  try {
+    const res = await adminService.approveAffiliate(item.id);
+    if (res?.success || res?.data) {
+      store.showToast(`Afiliasi ${item.name} berhasil disetujui!`, 'success');
+      await loadAffiliates();
+    }
+  } catch (err) {
+    store.showToast(err.message || 'Gagal menyetujui afiliasi', 'error');
+  }
 };
 
-const rejectAffiliate = (item) => {
-  item.status = 'inactive';
-  store.showToast(`Afiliasi ${item.name} ditolak.`, 'warning');
+const rejectAffiliate = async (item) => {
+  try {
+    const res = await adminService.rejectAffiliate(item.id);
+    if (res?.success || res?.data) {
+      store.showToast(`Afiliasi ${item.name} ditolak.`, 'warning');
+      await loadAffiliates();
+    }
+  } catch (err) {
+    store.showToast(err.message || 'Gagal menolak afiliasi', 'error');
+  }
 };
 
 const openCommissionModal = (item) => {
@@ -243,10 +293,17 @@ const closeModal = () => {
   selectedAffiliate.value = null;
 };
 
-const saveCommissionRate = () => {
+const saveCommissionRate = async () => {
   if (selectedAffiliate.value) {
-    selectedAffiliate.value.commissionRate = Number(editCommissionRate.value);
-    store.showToast(`Komisi rate ${selectedAffiliate.value.name} berhasil diubah menjadi ${editCommissionRate.value}%!`, 'success');
+    try {
+      const res = await adminService.updateAffiliateCommissionRate(selectedAffiliate.value.id, editCommissionRate.value);
+      if (res?.success || res?.data) {
+        store.showToast(`Komisi rate ${selectedAffiliate.value.name} berhasil diubah menjadi ${editCommissionRate.value}%!`, 'success');
+        await loadAffiliates();
+      }
+    } catch (err) {
+      store.showToast(err.message || 'Gagal mengubah komisi rate', 'error');
+    }
   }
   closeModal();
 };

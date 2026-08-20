@@ -1,8 +1,8 @@
 import axios from 'axios';
 
-// Read configuration from environment variables
-const baseURL = import.meta.env.VITE_API_BASE_URL || 'https://api.yaytopup.com/v1';
-const timeout = Number(import.meta.env.VITE_API_TIMEOUT) || 10000;
+// Read configuration from environment variables (defaults to '/api/v1' for Vite proxy or direct relative path)
+const baseURL = import.meta.env.VITE_API_BASE_URL || '/api/v1';
+const timeout = Number(import.meta.env.VITE_API_TIMEOUT) || 15000;
 
 // Create Axios Instance
 const axiosClient = axios.create({
@@ -10,13 +10,11 @@ const axiosClient = axios.create({
   timeout,
   headers: {
     'Content-Type': 'application/json',
-    'Accept': 'application/json',
-    'X-Client-Platform': 'Web-Vue3',
-    'X-App-Version': '1.0.0'
+    'Accept': 'application/json'
   }
 });
 
-// Request Interceptor: Attach Auth tokens, timestamp, dynamic headers
+// Request Interceptor: Attach Auth tokens
 axiosClient.interceptors.request.use(
   (config) => {
     // Retrieve Auth token from localStorage if present
@@ -24,9 +22,6 @@ axiosClient.interceptors.request.use(
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
-
-    // Attach request timestamp for debugging / tracking
-    config.headers['X-Request-Timestamp'] = new Date().toISOString();
     
     return config;
   },

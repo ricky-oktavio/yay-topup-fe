@@ -118,24 +118,47 @@ import { useRouter } from 'vue-router';
 import { Mail01Icon, Key01Icon, ViewIcon, ViewOffIcon } from 'hugeicons-vue';
 import { useTopupStore } from '../stores/topupStore';
 
+import { authService } from '../api/authService';
+
 const router = useRouter();
 const store = useTopupStore();
 
 const name = ref('');
 const email = ref('');
 const password = ref('');
+const bankName = ref('BCA');
+const accountNumber = ref('');
+const accountHolder = ref('');
 const showPassword = ref(false);
 const isSubmitting = ref(false);
 
-const handleRegisterSubmit = () => {
+const handleRegisterSubmit = async () => {
   if (!name.value || !email.value || !password.value) return;
 
   isSubmitting.value = true;
-  setTimeout(() => {
+  try {
+    const payload = {
+      name: name.value,
+      email: email.value,
+      password: password.value,
+      bank_name: bankName.value || 'BCA',
+      account_number: accountNumber.value || '1234567890',
+      account_holder: accountHolder.value || name.value
+    };
+
+    const res = await authService.registerAffiliate(payload);
+    if (res?.success || res?.data) {
+      store.showToast(`Pendaftaran berhasil! Akun Anda siap digunakan.`, 'success');
+      router.push('/login');
+    } else {
+      store.showToast('Pendaftaran berhasil diajukan.', 'success');
+      router.push('/login');
+    }
+  } catch (err) {
+    store.showToast(err.message || 'Gagal mendaftar akun', 'error');
+  } finally {
     isSubmitting.value = false;
-    store.showToast(`Pendaftaran berhasil! Selamat datang, ${name.value}!`, 'success');
-    router.push('/login');
-  }, 500);
+  }
 };
 
 const showFooterInfo = (title) => {
@@ -382,5 +405,29 @@ const showFooterInfo = (title) => {
 .footer-copyright {
   font-size: 0.8rem;
   color: #94a3b8;
+}
+
+@media (max-width: 640px) {
+  .register-content {
+    padding-top: 2rem;
+    padding-bottom: 3.5rem;
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+  .register-title {
+    font-size: 1.65rem;
+  }
+  .register-card-container {
+    max-width: 100%;
+  }
+  .register-card {
+    padding: 1.75rem 1.25rem;
+    border-radius: 16px;
+  }
+  .footer-links {
+    gap: 1rem;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
 }
 </style>

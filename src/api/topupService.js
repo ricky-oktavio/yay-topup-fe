@@ -2,61 +2,47 @@ import axiosClient from './axiosClient';
 
 export const topupService = {
   /**
-   * Check Backend API Health / Connection Status
+   * List active coin packages customers can buy
+   * GET /api/v1/topup/products
    */
-  async checkHealth() {
-    return axiosClient.get('/health');
+  async getProducts() {
+    return axiosClient.get('/topup/products');
   },
 
   /**
-   * Get all product categories
+   * Validate a target game / user ID before checkout
+   * POST /api/v1/topup/check-id
+   * @param {Object} payload { game_code, user_id, zone_id }
    */
-  async getCategories() {
-    return axiosClient.get('/categories');
+  async checkUserId(payload) {
+    return axiosClient.post('/topup/check-id', {
+      game_code: payload.game_code || 'momolive',
+      user_id: payload.user_id?.toString() || payload.target_user_id?.toString(),
+      zone_id: payload.zone_id || ''
+    });
   },
 
   /**
-   * Get products by category ID
+   * Start a purchase and get a Xendit invoice to pay
+   * POST /api/v1/topup/checkout
+   * @param {Object} payload { product_id, target_user_id, target_zone_id, affiliate_code }
    */
-  async getProductsByCategory(categoryId) {
-    return axiosClient.get(`/categories/${categoryId}/products`);
+  async checkout(payload) {
+    return axiosClient.post('/topup/checkout', {
+      product_id: payload.product_id,
+      target_user_id: payload.target_user_id?.toString(),
+      target_zone_id: payload.target_zone_id || '',
+      affiliate_code: payload.affiliate_code || undefined
+    });
   },
 
   /**
-   * Get details of a single product
+   * Check a transaction's current status
+   * GET /api/v1/topup/transactions/{id}
+   * @param {string} transactionId
    */
-  async getProductById(productId) {
-    return axiosClient.get(`/products/${productId}`);
-  },
-
-  /**
-   * Get available payment methods
-   */
-  async getPaymentMethods() {
-    return axiosClient.get('/payment-methods');
-  },
-
-  /**
-   * Create a new top-up order / checkout
-   * @param {Object} payload { productId, targetAccount, paymentMethodCode, referralCode }
-   */
-  async createOrder(payload) {
-    return axiosClient.post('/orders', payload);
-  },
-
-  /**
-   * Get transaction details by order ID
-   * @param {string} orderId
-   */
-  async getOrderById(orderId) {
-    return axiosClient.get(`/orders/${orderId}`);
-  },
-
-  /**
-   * Get transaction history for current user / session
-   */
-  async getTransactionHistory() {
-    return axiosClient.get('/transactions');
+  async getTransactionStatus(transactionId) {
+    return axiosClient.get(`/topup/transactions/${transactionId}`);
   }
 };
 

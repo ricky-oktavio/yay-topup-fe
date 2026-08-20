@@ -111,54 +111,56 @@ import { useTopupStore } from '../stores/topupStore';
 
 const store = useTopupStore();
 
-const searchId = ref('YT123456789');
+const searchId = ref('');
 const isSearching = ref(false);
+const searchResult = ref(null);
 
-const searchResult = ref({
-  id: 'YT123456789',
-  product: 'Momocoin',
-  targetUser: '123456789',
-  status: 'PAID',
-  amount: 50000,
-  date: '15 May 2024, 14:20'
-});
-
-const handleCheckStatus = () => {
-  if (!searchId.value.trim()) return;
+const handleCheckStatus = async () => {
+  const query = searchId.value.trim();
+  if (!query) return;
 
   isSearching.value = true;
+  try {
+    // 1. Try querying live transaction API
+    const apiRes = await store.getTransactionStatus(query);
+    if (apiRes && apiRes.data) {
+      const trx = apiRes.data;
+      searchResult.value = {
+        id: trx.id || query,
+        product: trx.product_name || trx.product || 'Momo Live Coin',
+        targetUser: trx.target_user_id || trx.targetUser || '-',
+        status: (trx.status || 'PAID').toUpperCase(),
+        amount: Number(trx.amount || 0),
+        date: trx.created_at || new Date().toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' })
+      };
+      store.showToast('Data transaksi berhasil ditemukan!', 'success');
+      return;
+    }
 
-  setTimeout(() => {
-    isSearching.value = false;
-    
-    // Check in store transactions first
+    // 2. Check in local store history
     const foundInStore = store.transactions.find(
-      (t) => t.id.toLowerCase() === searchId.value.trim().toLowerCase()
+      (t) => t.id?.toLowerCase() === query.toLowerCase() || t.referenceNo?.toLowerCase() === query.toLowerCase()
     );
 
     if (foundInStore) {
       searchResult.value = {
         id: foundInStore.id,
-        product: foundInStore.productName || 'Momocoin',
+        product: foundInStore.productName || 'Momo Live Coin',
         targetUser: foundInStore.targetAccount,
         status: foundInStore.status === 'SUCCESS' ? 'PAID' : foundInStore.status,
-        amount: foundInStore.amount,
+        amount: Number(foundInStore.amount || 0),
         date: foundInStore.createdAt
       };
       store.showToast('Data transaksi ditemukan!', 'success');
     } else {
-      // Default demo result matching screenshot
-      searchResult.value = {
-        id: searchId.value.trim().toUpperCase(),
-        product: 'Momocoin',
-        targetUser: '123456789',
-        status: 'PAID',
-        amount: 50000,
-        date: new Date().toLocaleString('en-GB', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })
-      };
-      store.showToast(`Status transaksi ${searchId.value.trim()} berhasil dicek!`, 'info');
+      store.showToast(`Transaksi ${query} tidak ditemukan.`, 'warning');
+      searchResult.value = null;
     }
-  }, 400);
+  } catch (err) {
+    store.showToast(err.message || 'Gagal mengecek status transaksi', 'error');
+  } finally {
+    isSearching.value = false;
+  }
 };
 
 const showFooterInfo = (title) => {
@@ -418,5 +420,29 @@ const showFooterInfo = (title) => {
 .footer-copyright {
   font-size: 0.8rem;
   color: #94a3b8;
+}
+
+@media (max-width: 640px) {
+  .status-content {
+    padding-top: 2rem;
+    padding-bottom: 3.5rem;
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+  .main-title {
+    font-size: 1.75rem;
+  }
+  .topup-card-container {
+    max-width: 100%;
+  }
+  .topup-card {
+    padding: 1.5rem 1.25rem;
+    border-radius: 16px;
+  }
+  .footer-links {
+    gap: 1rem;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
 }
 </style>

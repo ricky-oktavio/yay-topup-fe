@@ -95,9 +95,10 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
 import AdminNavbar from '../../components/layout/AdminNavbar.vue';
 import { useTopupStore } from '../../stores/topupStore';
+import { adminService } from '../../api/adminService';
 
 const store = useTopupStore();
 
@@ -106,13 +107,43 @@ const minWithdrawalAmount = ref(50000);
 const companyCredentials = ref('PT. JLIMA DIGITAL INDONESIA');
 const isSaving = ref(false);
 
-const handleSaveSettings = () => {
-  isSaving.value = true;
+const loadSettings = async () => {
+  try {
+    const res = await adminService.getSettings();
+    if (res?.data) {
+      if (res.data.global_commission_rate !== undefined) {
+        globalCommissionRate.value = Number(res.data.global_commission_rate);
+      }
+      if (res.data.minimum_withdrawal_amount !== undefined) {
+        minWithdrawalAmount.value = Number(res.data.minimum_withdrawal_amount);
+      }
+    }
+  } catch (err) {
+    console.warn('[AdminSettings] Failed to fetch settings', err);
+  }
+};
 
-  setTimeout(() => {
+onMounted(() => {
+  loadSettings();
+});
+
+const handleSaveSettings = async () => {
+  isSaving.value = true;
+  try {
+    const payload = {
+      global_commission_rate: Number(globalCommissionRate.value),
+      minimum_withdrawal_amount: Number(minWithdrawalAmount.value)
+    };
+    const res = await adminService.updateSettings(payload);
+    if (res?.success || res?.data) {
+      store.showToast('Pengaturan sistem berhasil disimpan!', 'success');
+      await loadSettings();
+    }
+  } catch (err) {
+    store.showToast(err.message || 'Gagal menyimpan pengaturan', 'error');
+  } finally {
     isSaving.value = false;
-    store.showToast('Pengaturan sistem berhasil disimpan!', 'success');
-  }, 400);
+  }
 };
 
 const showFooterInfo = (title) => {
@@ -289,5 +320,23 @@ const showFooterInfo = (title) => {
 
 .footer-right a:hover {
   color: #7c3aed;
+}
+
+@media (max-width: 640px) {
+  .admin-container {
+    padding: 0 1rem;
+  }
+  .page-title {
+    font-size: 1.75rem;
+  }
+  .settings-card {
+    padding: 1.25rem 1rem;
+    border-radius: 16px;
+  }
+  .footer-inner {
+    flex-direction: column;
+    gap: 0.75rem;
+    text-align: center;
+  }
 }
 </style>

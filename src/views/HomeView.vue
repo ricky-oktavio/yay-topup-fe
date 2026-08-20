@@ -279,11 +279,14 @@
                     <div v-if="pkg.isFeatured" class="v2-featured-tag">TERLARIS</div>
                     <div class="v2-pkg-left">
                       <h3 class="v2-pkg-name">{{ pkg.name }}</h3>
-                      <p class="v2-pkg-bonus">Bonus {{ pkg.bonus }}</p>
+                      <p v-if="pkg.bonus > 0" class="v2-pkg-bonus">Bonus {{ pkg.bonus }}</p>
                       <p class="v2-pkg-price">Rp {{ pkg.price.toLocaleString('id-ID') }}</p>
                     </div>
                     <div class="v2-pkg-thumb">
                       <img src="../assets/momo.jpeg" alt="Momo Coin" class="v2-thumb-img" />
+                    </div>
+                    <div class="v2-pkg-check">
+                      <CheckmarkCircle01Icon :size="16" />
                     </div>
                   </div>
                 </div>
@@ -444,7 +447,7 @@
         <div class="v3-hero-header">
           <div class="v3-hero-left">
             <a href="https://www.momoindo.com/?lng=id" target="_blank" rel="noopener noreferrer" class="v3-logo-badge" title="Website Momo Live">
-              <img src="../assets/momo.jpeg" alt="Momo Live Logo" class="v3-hero-logo" />
+              <img src="../assets/momolive_logo.png" alt="Momo Live Logo" class="v3-hero-logo" />
             </a>
             <div class="v3-hero-text">
               <div class="v3-pill-badge">TOP UP RESMI 24 JAM</div>
@@ -851,7 +854,7 @@ const expandedCategory = ref('qris');
 const showConfirmModal = ref(false);
 
 // Packages List for V2
-const packagesList = [
+const packagesList = ref([
   { id: 1, name: 'Coin 10000', bonus: 0, price: 10000, coins: 10000, isFeatured: false },
   { id: 2, name: 'Coin 20000', bonus: 0, price: 20000, coins: 20000, isFeatured: false },
   { id: 3, name: 'Coin 30000', bonus: 0, price: 30000, coins: 30000, isFeatured: false },
@@ -864,17 +867,17 @@ const packagesList = [
   { id: 10, name: 'Coin 400000', bonus: 4000, price: 400000, coins: 400000, isFeatured: false },
   { id: 11, name: 'Coin 450000', bonus: 4500, price: 450000, coins: 450000, isFeatured: false },
   { id: 12, name: 'Coin 500000', bonus: 5000, price: 500000, coins: 500000, isFeatured: false }
-];
+]);
 
 // Clean V3 Packages List
-const v3Packages = [
+const v3Packages = ref([
   { id: 1, name: '1.000 Coins', bonus: 0, price: 100000, coins: 1000, badge: 'TERLARIS' },
   { id: 2, name: '5.000 Coins', bonus: 250, price: 500000, coins: 5000, badge: 'POPULER', isFeatured: true },
   { id: 3, name: '10.000 Coins', bonus: 1000, price: 1000000, coins: 10000, badge: 'REKOMENDASI' },
   { id: 4, name: '25.000 Coins', bonus: 2500, price: 2500000, coins: 25000, badge: '' },
   { id: 5, name: '50.000 Coins', bonus: 5000, price: 5000000, coins: 50000, badge: 'PROMO' },
   { id: 6, name: '100.000 Coins', bonus: 12000, price: 10000000, coins: 100000, badge: 'VIP' }
-];
+]);
 
 const paymentCategories = [
   {
@@ -918,17 +921,39 @@ const paymentCategories = [
   }
 ];
 
-onMounted(() => {
-  selectedPackage.value = activeVersion.value === 'v2' ? packagesList[0] : v3Packages[1];
+onMounted(async () => {
+  selectedPackage.value = activeVersion.value === 'v2' ? packagesList.value[0] : v3Packages.value[1];
 
   if (route.query.ref) {
     referralCode.value = route.query.ref.toString();
     isRefFromUrl.value = true;
     store.showToast(`Kode referral "${route.query.ref}" terpasang.`, 'success');
   }
+
+  // Fetch live products from REST API
+  try {
+    const apiProducts = await store.fetchProducts('momolive');
+    if (apiProducts && apiProducts.data && apiProducts.data.length > 0) {
+      v3Packages.value = apiProducts.data.map((p, idx) => ({
+        id: p.id || idx + 1,
+        name: p.name || `${Number(p.coin_amount || 1000).toLocaleString('id-ID')} Coins`,
+        bonus: Number(p.bonus_coin || p.bonus || 0),
+        price: Number(p.selling_price || p.price || 100000),
+        coins: Number(p.coin_amount || p.amount || p.coins || 1000),
+        badge: p.flag ? p.flag.toUpperCase() : (p.badge || (idx === 0 ? 'TERLARIS' : idx === 1 ? 'POPULER' : ''))
+      }));
+      packagesList.value = v3Packages.value.map(p => ({
+        ...p,
+        isFeatured: p.badge?.includes('TERLARIS') || p.badge?.includes('POPULER')
+      }));
+      selectedPackage.value = activeVersion.value === 'v2' ? packagesList.value[0] : v3Packages.value[0];
+    }
+  } catch (err) {
+    console.warn('[HomeView] Failed to load dynamic products', err);
+  }
 });
 
-// Account verification
+// Account verification via Live API
 const isCheckingUser = ref(false);
 const isVerified = ref(false);
 const verifiedUsername = ref('');
@@ -948,10 +973,22 @@ watch(momocoinId, (newVal) => {
   isCheckingUser.value = true;
   isVerified.value = false;
 
-  checkTimer = setTimeout(() => {
-    isCheckingUser.value = false;
-    isVerified.value = true;
-    verifiedUsername.value = `Momo#${trimmed.slice(-4)}`;
+  checkTimer = setTimeout(async () => {
+    try {
+      const apiRes = await store.checkUserId(trimmed, 'momolive');
+      isCheckingUser.value = false;
+      if (apiRes && apiRes.data && (apiRes.data.username || apiRes.data.name)) {
+        isVerified.value = true;
+        verifiedUsername.value = apiRes.data.username || apiRes.data.name;
+      } else {
+        isVerified.value = true;
+        verifiedUsername.value = `Momo#${trimmed.slice(-4)}`;
+      }
+    } catch {
+      isCheckingUser.value = false;
+      isVerified.value = true;
+      verifiedUsername.value = `Momo#${trimmed.slice(-4)}`;
+    }
   }, 450);
 });
 
@@ -1033,25 +1070,40 @@ const openConfirmModal = () => {
   showConfirmModal.value = true;
 };
 
-const proceedCheckout = () => {
+const proceedCheckout = async () => {
   showConfirmModal.value = false;
   let finalCoins = 0;
+  let productId = selectedPackage.value?.id?.toString() || 'momo-coin-package';
+
   if (denomMode.value === 'packages' && selectedPackage.value) {
     finalCoins = selectedPackage.value.coins;
   } else {
     finalCoins = coinAmount.value;
   }
 
-  store.setCurrentOrder({
-    momocoinId: momocoinId.value,
-    referralCode: referralCode.value || '-',
-    coinAmount: finalCoins,
-    totalPrice: currentFinalPrice.value,
-    paymentMethod: activeMethodObj.value?.name || 'QRIS',
-    whatsapp: whatsappNumber.value || '-'
-  });
+  isLoading.value = true;
+  try {
+    store.setCurrentOrder({
+      productId,
+      momocoinId: momocoinId.value,
+      referralCode: referralCode.value || '-',
+      coinAmount: finalCoins,
+      totalPrice: currentFinalPrice.value,
+      paymentMethod: activeMethodObj.value?.name || 'QRIS',
+      whatsapp: whatsappNumber.value || '-'
+    });
 
-  router.push('/payment');
+    // Call live checkout API
+    await store.submitCheckout({
+      product_id: productId,
+      target_user_id: momocoinId.value,
+      affiliate_code: referralCode.value || undefined
+    });
+
+    router.push('/payment');
+  } finally {
+    isLoading.value = false;
+  }
 };
 </script>
 
@@ -1187,8 +1239,9 @@ const proceedCheckout = () => {
 .v2-preset-chip.active { background: #e2f900; color: #881337; border-color: #e2f900; }
 
 .v2-packages-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.25rem; }
-.v2-pkg-card { position: relative; background-color: #9a04db; border: 2px solid rgba(255, 255, 255, 0.5); border-radius: 16px; padding: 1.25rem 1.5rem; display: flex; align-items: center; justify-content: space-between; cursor: pointer; transition: all 0.2s ease; }
+.v2-pkg-card { position: relative; background-color: #9a04db; border: 2px solid rgba(255, 255, 255, 0.5); border-radius: 16px; padding: 1.25rem 1.5rem; display: flex; align-items: center; justify-content: space-between; cursor: pointer; transition: all 0.2s ease; overflow: hidden; }
 .v2-pkg-card:hover { transform: translateY(-2px); }
+.v2-pkg-card.active { border-color: #e2f900; background-color: rgba(226, 249, 0, 0.15); box-shadow: 0 0 0 2px #e2f900; }
 .v2-pkg-card.featured { border-color: #f97316 !important; box-shadow: 0 0 20px rgba(249, 115, 22, 0.75); }
 .v2-featured-tag { position: absolute; top: -12px; left: 16px; background: #ea580c; color: #ffffff; font-size: 0.7rem; font-weight: 800; padding: 2px 10px; border-radius: 8px; }
 
@@ -1197,6 +1250,31 @@ const proceedCheckout = () => {
 .v2-pkg-price { font-size: 1rem; font-style: italic; font-weight: 700; color: #38bdf8; margin-top: 0.25rem; }
 .v2-pkg-thumb { width: 44px; height: 44px; border-radius: 10px; overflow: hidden; flex-shrink: 0; }
 .v2-thumb-img { width: 100%; height: 100%; object-fit: cover; }
+
+.v2-pkg-check {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 24px;
+  height: 24px;
+  background: #e2f900;
+  color: #881337;
+  border-top-left-radius: 10px;
+  border-bottom-right-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transform: scale(0.5);
+  transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+  pointer-events: none;
+  z-index: 2;
+}
+
+.v2-pkg-card.active .v2-pkg-check {
+  opacity: 1;
+  transform: scale(1);
+}
 
 .v2-accordions { display: flex; flex-direction: column; gap: 1rem; }
 .v2-acc-item { border-radius: 14px; overflow: hidden; }
@@ -1347,13 +1425,26 @@ const proceedCheckout = () => {
 
 .v3-pkg-card {
   position: relative; background: #ffffff; border: 1.5px solid #e2e8f0;
-  border-radius: 16px; padding: 1.25rem; display: flex; flex-direction: column; cursor: pointer; transition: all 0.2s ease;
+  border-radius: 16px; padding: 1.15rem 1.25rem; display: flex; flex-direction: column; cursor: pointer; transition: all 0.2s ease;
+  overflow: hidden;
 }
 
 .v3-pkg-card:hover { transform: translateY(-2px); border-color: #8b5cf6; box-shadow: 0 10px 25px -5px rgba(139, 92, 246, 0.15); }
 .v3-pkg-card.active { border-color: #ec4899; background: #fff5f8; box-shadow: 0 0 0 2px #ec4899; }
-
-.v3-pkg-badge { position: absolute; top: -10px; right: 12px; background: linear-gradient(135deg, #ec4899 0%, #f43f5e 100%); color: #ffffff; font-size: 0.65rem; font-weight: 800; padding: 2px 8px; border-radius: 6px; }
+.v3-pkg-badge {
+  position: absolute;
+  top: 0;
+  right: 0;
+  background: linear-gradient(135deg, #ec4899 0%, #f43f5e 100%);
+  color: #ffffff;
+  font-size: 0.625rem;
+  font-weight: 800;
+  padding: 2px 8px;
+  border-bottom-left-radius: 8px;
+  border-top-right-radius: 14px;
+  letter-spacing: 0.02em;
+  z-index: 1;
+}
 
 .v3-pkg-inner { display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; width: 100%; }
 .v3-pkg-left-info { display: flex; flex-direction: column; }
@@ -1366,8 +1457,30 @@ const proceedCheckout = () => {
 .v3-pkg-bonus { font-size: 0.8rem; font-weight: 700; color: #059669; margin-bottom: 0.25rem; }
 .v3-pkg-price { font-size: 1rem; font-weight: 800; color: #7c3aed; }
 
-.v3-pkg-check { position: absolute; bottom: 12px; right: 12px; color: #cbd5e1; }
-.v3-pkg-card.active .v3-pkg-check { color: #ec4899; }
+.v3-pkg-check {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 24px;
+  height: 24px;
+  background: linear-gradient(135deg, #7c3aed 0%, #ec4899 100%);
+  color: #ffffff;
+  border-top-left-radius: 10px;
+  border-bottom-right-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transform: scale(0.5);
+  transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+  pointer-events: none;
+  z-index: 2;
+}
+
+.v3-pkg-card.active .v3-pkg-check {
+  opacity: 1;
+  transform: scale(1);
+}
 
 .v3-custom-section { display: flex; flex-direction: column; gap: 1rem; }
 .v3-input-icon-wrap { position: relative; display: flex; align-items: center; }
@@ -1446,7 +1559,7 @@ const proceedCheckout = () => {
 .btn-inner { display: flex; align-items: center; justify-content: center; gap: 0.5rem; }
 
 /* Modal */
-.v2-modal-overlay { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.75); backdrop-filter: blur(6px); z-index: 9999; display: flex; align-items: center; justify-content: center; padding: 1.5rem; }
+.v2-modal-overlay { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.75); backdrop-filter: blur(6px); z-index: 9999; display: flex; align-items: center; justify-content: center; padding: 1rem; }
 .v2-modal-box { width: 100%; max-width: 480px; background: #9a04db; border: 3px solid #e2f900; border-radius: 22px; padding: 1.75rem; box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5); }
 .v2-modal-box.v3-modal-style { background: #ffffff; border: 2px solid #e2e8f0; color: #0f172a; box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15); }
 .v2-modal-box.v3-modal-style .v2-modal-title { color: #0f172a; }
@@ -1475,18 +1588,142 @@ const proceedCheckout = () => {
 .v2-modal-btn.cancel { background: rgba(255, 255, 255, 0.2); color: #ffffff; }
 .v2-modal-btn.confirm { background: #e11d48; color: #ffffff; }
 
-/* Responsive */
+/* Responsive Media Queries (Mobile & Tablet) */
 @media (max-width: 900px) {
   .v2-grid-layout { grid-template-columns: 1fr; }
   .v2-product-card { flex-direction: row; text-align: left; gap: 1.5rem; }
   .v2-product-badge { margin-bottom: 0; width: 80px; height: 80px; }
   .v2-packages-grid { grid-template-columns: 1fr; }
   .v2-footer-inner { grid-template-columns: 1fr; gap: 2rem; }
-  .v3-packages-grid { grid-template-columns: 1fr 1fr; }
+  .v3-packages-grid { grid-template-columns: repeat(2, 1fr); }
 }
 
 @media (max-width: 640px) {
-  .v3-hero-left { flex-direction: column; text-align: center; }
-  .v3-packages-grid { grid-template-columns: 1fr; }
+  .v3-main-wrapper {
+    margin: 1rem auto;
+    padding: 0 0.85rem;
+    gap: 1.25rem;
+  }
+  .v3-hero-header {
+    padding: 1.25rem 1rem;
+    border-radius: 16px;
+  }
+  .v3-hero-left {
+    flex-direction: column;
+    text-align: center;
+    gap: 0.85rem;
+  }
+  .v3-logo-badge {
+    width: 56px;
+    height: 56px;
+    border-radius: 14px;
+  }
+  .v3-main-title {
+    font-size: 1.45rem;
+  }
+  .v3-main-subtitle {
+    font-size: 0.825rem;
+  }
+  .v3-step-card {
+    padding: 1.25rem 1rem;
+    border-radius: 16px;
+  }
+  .v3-step-heading {
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+  }
+  .v3-step-number {
+    width: 32px;
+    height: 32px;
+    font-size: 0.95rem;
+    border-radius: 10px;
+  }
+  .v3-step-title {
+    font-size: 1.05rem;
+  }
+  .v3-step-desc {
+    font-size: 0.8rem;
+  }
+  .v3-packages-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.65rem;
+  }
+  .v3-pkg-card {
+    padding: 0.85rem 0.75rem;
+    border-radius: 12px;
+  }
+  .v3-pkg-title {
+    font-size: 0.925rem;
+  }
+  .v3-pkg-bonus {
+    font-size: 0.725rem;
+  }
+  .v3-pkg-price {
+    font-size: 0.875rem;
+  }
+  .v3-pkg-thumb-wrap {
+    width: 34px;
+    height: 34px;
+    border-radius: 8px;
+  }
+  .v3-coin-avatar {
+    width: 18px;
+    height: 18px;
+  }
+  .v3-acc-header {
+    padding: 0.85rem 1rem;
+  }
+  .v3-acc-title {
+    font-size: 0.875rem;
+  }
+  .v3-method-item {
+    padding: 0.75rem 0.85rem;
+  }
+  .v3-method-name {
+    font-size: 0.85rem;
+  }
+  .v3-method-speed {
+    font-size: 0.7rem;
+  }
+  .v3-method-price {
+    font-size: 0.875rem;
+  }
+  .v3-fields-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+  .v3-checkout-box {
+    padding: 1.25rem 1rem;
+    border-radius: 16px;
+  }
+  .v3-btn-checkout {
+    padding: 0.95rem 1rem;
+    font-size: 1rem;
+    border-radius: 12px;
+  }
+  .v2-modal-box {
+    padding: 1.25rem 1rem;
+    border-radius: 16px;
+  }
+  .v2-modal-title {
+    font-size: 1.1rem;
+  }
+  .v2-modal-body {
+    padding: 1rem;
+    font-size: 0.85rem;
+  }
+}
+
+@media (max-width: 380px) {
+  .v3-packages-grid {
+    grid-template-columns: 1fr;
+  }
+  .v3-presets-flex {
+    gap: 0.35rem;
+  }
+  .v3-preset-chip {
+    padding: 0.35rem 0.65rem;
+    font-size: 0.75rem;
+  }
 }
 </style>

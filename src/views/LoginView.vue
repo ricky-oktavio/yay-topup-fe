@@ -88,11 +88,11 @@
                 type="button" 
                 class="demo-account-btn admin-btn" 
                 @click="fillDemoAccount('admin')"
-                title="Login sebagai Admin"
+                title="Login sebagai Administrator"
               >
                 <div class="role-info">
-                  <strong class="role-title">Admin YayTopup</strong>
-                  <span class="role-email">admin@yaytopup.com</span>
+                  <strong class="role-title">Administrator</strong>
+                  <span class="role-email">admin@gmail.com</span>
                 </div>
               </button>
 
@@ -154,40 +154,41 @@ const password = ref('');
 const showPassword = ref(false);
 const isSubmitting = ref(false);
 
-const fillDemoAccount = (role) => {
+const fillDemoAccount = async (role) => {
   if (role === 'admin') {
-    email.value = 'admin@yaytopup.com';
+    email.value = 'admin@gmail.com';
     password.value = 'admin123';
-    store.loginUser({ email: email.value, name: 'Admin YayTopup', role: 'admin' });
-    store.showToast('Berhasil login sebagai Admin YayTopup!', 'success');
-    router.push('/admin/products');
+    const res = await store.loginUser({ email: email.value, password: password.value });
+    if (res?.success) {
+      router.push('/admin/products');
+    }
   } else {
     email.value = 'partner@yaytopup.com';
     password.value = 'partner123';
-    store.loginUser({ email: email.value, name: 'Partner Affiliate', role: 'affiliate' });
-    store.showToast('Berhasil login sebagai Partner Affiliate!', 'success');
-    router.push('/affiliate/dashboard');
+    const res = await store.loginUser({ email: email.value, password: password.value });
+    if (res?.success) {
+      router.push('/affiliate/dashboard');
+    }
   }
 };
 
-const handleLoginSubmit = () => {
+const handleLoginSubmit = async () => {
   if (!email.value || !password.value) return;
 
   isSubmitting.value = true;
-  setTimeout(() => {
-    isSubmitting.value = false;
-    const lower = email.value.toLowerCase();
-    
-    if (lower.includes('admin')) {
-      store.loginUser({ email: email.value, name: 'Admin YayTopup', role: 'admin' });
-      store.showToast('Selamat datang Admin YayTopup!', 'success');
-      router.push('/admin/products');
-    } else {
-      store.loginUser({ email: email.value, name: 'Partner Affiliate', role: 'affiliate' });
-      store.showToast('Selamat datang Partner Affiliate!', 'success');
-      router.push('/affiliate/dashboard');
+  try {
+    const res = await store.loginUser({ email: email.value, password: password.value });
+    if (res?.success) {
+      const role = (res.user?.role || '').toLowerCase();
+      if (role === 'admin' || role === 'superadmin' || email.value.toLowerCase().includes('admin')) {
+        router.push('/admin/products');
+      } else {
+        router.push('/affiliate/dashboard');
+      }
     }
-  }, 500);
+  } finally {
+    isSubmitting.value = false;
+  }
 };
 
 const showFooterInfo = (title) => {

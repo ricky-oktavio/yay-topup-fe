@@ -185,36 +185,79 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted, watch } from 'vue';
 import { Download01Icon, File01Icon, InformationCircleIcon } from 'hugeicons-vue';
 import AdminNavbar from '../../components/layout/AdminNavbar.vue';
 import { useTopupStore } from '../../stores/topupStore';
+import { adminService } from '../../api/adminService';
 
 const store = useTopupStore();
 
 const currentTab = ref('all');
+const withdrawals = ref([]);
+const isLoading = ref(false);
 
-const withdrawals = ref([
-  { id: 1, date: '24 Oct 2023, 10:45', affiliateName: 'Budi Santoso', amount: 500000, bank: 'BCA', accountNumber: '8739182390', status: 'pending', isProcessing: false },
-  { id: 2, date: '23 Oct 2023, 14:20', affiliateName: 'Siti Aminah', amount: 1200000, bank: 'Mandiri', accountNumber: '123456789012', status: 'approved', isProcessing: false },
-  { id: 3, date: '22 Oct 2023, 09:15', affiliateName: 'Ahmad Reza', amount: 350000, bank: 'GoPay', accountNumber: '081234567890', status: 'paid', isProcessing: false },
-  { id: 4, date: '21 Oct 2023, 16:30', affiliateName: 'Dewi Lestari', amount: 750000, bank: 'OVO', accountNumber: '089876543210', status: 'failed', isProcessing: false },
-  { id: 5, date: '24 Oct 2023, 11:05', affiliateName: 'Joko Widodo', amount: 2500000, bank: 'BNI', accountNumber: '0987654321', status: 'pending', isProcessing: false }
-]);
+const loadWithdrawals = async () => {
+  isLoading.value = true;
+  try {
+    const params = {};
+    if (currentTab.value !== 'all') {
+      params.status = currentTab.value;
+    }
+    const res = await adminService.getWithdrawals(params);
+    const list = Array.isArray(res) 
+      ? res 
+      : (Array.isArray(res?.data) 
+          ? res.data 
+          : (Array.isArray(res?.data?.withdrawals) 
+              ? res.data.withdrawals 
+              : (Array.isArray(res?.data?.data) ? res.data.data : [])));
+
+    withdrawals.value = list.map(w => ({
+      id: w.id,
+      date: w.created_at || w.date || new Date().toLocaleString('id-ID'),
+      affiliateName: w.affiliate_name || w.affiliateName || 'Partner',
+      amount: Number(w.amount || 0),
+      bank: w.bank_name || w.bank || 'BCA',
+      accountNumber: w.account_number || w.accountNumber || '-',
+      status: w.status || 'pending',
+      isProcessing: false
+    }));
+  } catch (err) {
+    store.showToast(err.message || 'Gagal memuat data penarikan', 'error');
+    withdrawals.value = [];
+  } finally {
+    isLoading.value = false;
+  }
+};
+
+onMounted(() => {
+  loadWithdrawals();
+});
+
+watch(currentTab, () => {
+  loadWithdrawals();
+});
 
 const filteredWithdrawals = computed(() => {
   if (currentTab.value === 'all') return withdrawals.value;
   return withdrawals.value.filter(w => w.status === currentTab.value);
 });
 
-const approveWithdrawal = (item) => {
+const approveWithdrawal = async (item) => {
   item.isProcessing = true;
-
-  setTimeout(() => {
+  try {
+    const res = await adminService.approveWithdrawal(item.id);
+    if (res?.success || res?.data) {
+      item.status = 'approved';
+      store.showToast(`Withdrawal Rp ${item.amount.toLocaleString('id-ID')} untuk ${item.affiliateName} disetujui & diproses via Xendit Payout!`, 'success');
+      await loadWithdrawals();
+    }
+  } catch (err) {
+    store.showToast(err.message || 'Gagal memproses persetujuan penarikan', 'error');
+  } finally {
     item.isProcessing = false;
-    item.status = 'approved';
-    store.showToast(`Withdrawal Rp ${item.amount.toLocaleString('id-ID')} untuk ${item.affiliateName} disetujui & diproses via Xendit Payout!`, 'success');
-  }, 700);
+  }
 };
 
 const showDetail = (item) => {
@@ -612,5 +655,36 @@ const showFooterInfo = (title) => {
 
 .footer-right a:hover {
   color: #7c3aed;
+}
+
+@media (max-width: 640px) {
+  .admin-container {
+    padding: 0 1rem;
+  }
+  .admin-header-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.85rem;
+  }
+  .page-title {
+    font-size: 1.75rem;
+  }
+  .filter-search-wrapper {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+  .status-filters {
+    overflow-x: auto;
+    width: 100%;
+    padding-bottom: 0.25rem;
+  }
+  .table-card-wrapper {
+    border-radius: 12px;
+  }
+  .footer-inner {
+    flex-direction: column;
+    gap: 0.75rem;
+    text-align: center;
+  }
 }
 </style>

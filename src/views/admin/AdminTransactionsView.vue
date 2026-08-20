@@ -126,22 +126,50 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { Search01Icon, FilterIcon, GameController01Icon } from 'hugeicons-vue';
 import AdminNavbar from '../../components/layout/AdminNavbar.vue';
 import { useTopupStore } from '../../stores/topupStore';
+import { adminService } from '../../api/adminService';
 
 const store = useTopupStore();
 
 const searchQuery = ref('');
+const transactions = ref([]);
+const isLoading = ref(false);
 
-const transactions = ref([
-  { id: '#TRX-8921', date: '24 Okt 2023, 14:32', product: 'Mobile Legends (86 Diamonds)', targetUser: '12345678(1234)', amount: 25000, referralCode: '-', status: 'Paid' },
-  { id: '#TRX-8920', date: '24 Okt 2023, 14:28', product: 'Free Fire (140 Diamonds)', targetUser: '987654321', amount: 20000, referralCode: 'REF-WINA', status: 'Pending' },
-  { id: '#TRX-8919', date: '24 Okt 2023, 14:15', product: 'Genshin Impact (Blessing)', targetUser: '800123456', amount: 65000, referralCode: 'REF-DISC', status: 'Processing' },
-  { id: '#TRX-8918', date: '24 Okt 2023, 13:50', product: 'PUBG Mobile (60 UC)', targetUser: '5123456789', amount: 15000, referralCode: '-', status: 'Failed' },
-  { id: '#TRX-8917', date: '24 Okt 2023, 13:42', product: 'Mobile Legends (344 Diamonds)', targetUser: '11223344(5566)', amount: 100000, referralCode: '-', status: 'Paid' }
-]);
+const loadTransactions = async () => {
+  isLoading.value = true;
+  try {
+    const res = await adminService.getTransactions();
+    const list = Array.isArray(res) 
+      ? res 
+      : (Array.isArray(res?.data) 
+          ? res.data 
+          : (Array.isArray(res?.data?.transactions) 
+              ? res.data.transactions 
+              : (Array.isArray(res?.data?.data) ? res.data.data : [])));
+
+    transactions.value = list.map(t => ({
+      id: t.id ? `#${t.id}` : (t.transaction_id ? `#${t.transaction_id}` : '#TRX'),
+      date: t.created_at || t.date || new Date().toLocaleString('id-ID'),
+      product: t.product_name || t.product || 'Momo Live Coin',
+      targetUser: t.target_user_id || t.targetUser || '-',
+      amount: Number(t.gross_amount || t.amount || 0),
+      referralCode: t.affiliate_code || t.referralCode || '-',
+      status: t.payment_status || t.status || 'Paid'
+    }));
+  } catch (err) {
+    store.showToast(err.message || 'Gagal memuat transaksi', 'error');
+    transactions.value = [];
+  } finally {
+    isLoading.value = false;
+  }
+};
+
+onMounted(() => {
+  loadTransactions();
+});
 
 const filteredTransactions = computed(() => {
   if (!searchQuery.value.trim()) return transactions.value;
@@ -155,6 +183,7 @@ const filteredTransactions = computed(() => {
 });
 
 const toggleFilter = () => {
+  loadTransactions();
   store.showToast('Filter pencarian transaksi diterapkan.', 'info');
 };
 
@@ -548,10 +577,34 @@ const showFooterInfo = (title) => {
   color: #7c3aed;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 640px) {
+  .admin-container {
+    padding: 0 1rem;
+  }
   .admin-header-row {
     flex-direction: column;
     align-items: flex-start;
+    gap: 0.85rem;
+  }
+  .page-title {
+    font-size: 1.75rem;
+  }
+  .filter-search-wrapper {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+  .status-filters {
+    overflow-x: auto;
+    width: 100%;
+    padding-bottom: 0.25rem;
+  }
+  .table-card-wrapper {
+    border-radius: 12px;
+  }
+  .footer-inner {
+    flex-direction: column;
+    gap: 0.75rem;
+    text-align: center;
   }
 }
 </style>

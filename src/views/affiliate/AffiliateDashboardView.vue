@@ -184,72 +184,76 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
 import { UserGroupIcon, Wallet01Icon, Copy01Icon, BankIcon, ArrowRight01Icon } from 'hugeicons-vue';
 import AffiliateNavbar from '../../components/layout/AffiliateNavbar.vue';
 import { useTopupStore } from '../../stores/topupStore';
+import { authService } from '../../api/authService';
 
 const store = useTopupStore();
 
 // Dashboard Stats Data
-const totalReferrals = ref(124);
-const commissionBalance = ref(1250000);
-const referralCode = ref('YAY-WINA24');
+const totalReferrals = ref(0);
+const commissionBalance = ref(0);
+const referralCode = ref('');
+const registeredBank = ref({
+  name: 'BCA',
+  accountNo: '-'
+});
+const commissionHistory = ref([]);
+const isLoading = ref(false);
 
 // Form Tarik Saldo
 const withdrawAmount = ref(0);
 const isSubmittingWithdraw = ref(false);
 
-const registeredBank = ref({
-  name: 'Bank Central Asia (BCA)',
-  accountNo: '873918XXXX'
-});
-
-// History Commission Sample Rows matching screenshot
-const commissionHistory = ref([
-  {
-    id: 1,
-    date: '24 Oct 2024',
-    title: 'Topup FF 140 Diamonds',
-    sub: 'via Ref: YAY-WINA24',
-    amount: 1500,
-    status: 'Sukses'
-  },
-  {
-    id: 2,
-    date: '23 Oct 2024',
-    title: 'Topup MLBB 86 Diamonds',
-    sub: 'via Ref: YAY-WINA24',
-    amount: 800,
-    status: 'Sukses'
-  },
-  {
-    id: 3,
-    date: '20 Oct 2024',
-    title: 'Penarikan Saldo',
-    sub: 'ke BCA 873918XXXX',
-    amount: -500000,
-    status: 'Selesai'
-  },
-  {
-    id: 4,
-    date: '18 Oct 2024',
-    title: 'Topup PUBGM 60 UC',
-    sub: 'via Ref: YAY-WINA24',
-    amount: 1000,
-    status: 'Sukses'
+const loadDashboard = async () => {
+  isLoading.value = true;
+  try {
+    const res = await authService.getAffiliateDashboard();
+    if (res?.data) {
+      const data = res.data;
+      totalReferrals.value = Number(data.total_referrals || data.referrals_count || 0);
+      commissionBalance.value = Number(data.balance || data.commission_balance || 0);
+      referralCode.value = data.referral_code || data.code || '';
+      if (data.bank) {
+        registeredBank.value = {
+          name: data.bank.bank_name || data.bank.name || 'BCA',
+          accountNo: data.bank.account_number || data.bank.accountNo || '-'
+        };
+      }
+      if (data.history) {
+        commissionHistory.value = data.history.map(h => ({
+          id: h.id,
+          date: h.created_at || h.date || new Date().toLocaleString('id-ID'),
+          title: h.title || h.description || 'Komisi Referral',
+          sub: h.subtitle || `via Ref: ${referralCode.value}`,
+          amount: Number(h.amount || 0),
+          status: h.status || 'Sukses'
+        }));
+      }
+    }
+  } catch (err) {
+    console.warn('[AffiliateDashboard] Failed to fetch live dashboard stats', err);
+  } finally {
+    isLoading.value = false;
   }
-]);
+};
+
+onMounted(() => {
+  loadDashboard();
+});
 
 // Copy Code Handler
 const copyReferralCode = () => {
+  if (!referralCode.value) return;
   const fullUrl = `${window.location.origin}/?ref=${referralCode.value}`;
   navigator.clipboard.writeText(fullUrl);
   store.showToast(`Link referral ${fullUrl} berhasil disalin!`, 'success');
 };
 
 // Handle Withdraw Submission
-const handleWithdraw = () => {
+const handleWithdraw = async () => {
   if (withdrawAmount.value < 50000) {
     store.showToast('Jumlah penarikan minimal Rp 50.000', 'warning');
     return;
@@ -260,24 +264,18 @@ const handleWithdraw = () => {
   }
 
   isSubmittingWithdraw.value = true;
-  setTimeout(() => {
+  try {
+    const res = await authService.withdrawCommission(withdrawAmount.value);
+    if (res?.success || res?.data) {
+      store.showToast(`Pengajuan penarikan Rp ${withdrawAmount.value.toLocaleString('id-ID')} berhasil diajukan!`, 'success');
+      withdrawAmount.value = 0;
+      await loadDashboard();
+    }
+  } catch (err) {
+    store.showToast(err.message || 'Gagal mengajukan penarikan saldo', 'error');
+  } finally {
     isSubmittingWithdraw.value = false;
-    
-    // Deduct balance & add entry
-    commissionBalance.value -= withdrawAmount.value;
-    
-    commissionHistory.value.unshift({
-      id: Date.now(),
-      date: 'Hari ini',
-      title: 'Penarikan Saldo',
-      sub: `ke BCA ${registeredBank.value.accountNo}`,
-      amount: -withdrawAmount.value,
-      status: 'Proses'
-    });
-
-    store.showToast(`Pengajuan penarikan Rp ${withdrawAmount.value.toLocaleString('id-ID')} berhasil diajukan!`, 'success');
-    withdrawAmount.value = 0;
-  }, 600);
+  }
 };
 
 const showAllHistory = () => {
@@ -794,5 +792,31 @@ const showFooterNotice = (title) => {
 
 .footer-right a:hover {
   color: #7c4dff;
+}
+
+@media (max-width: 640px) {
+  .dashboard-container {
+    padding: 1.25rem 0.85rem;
+  }
+  .header-flex {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
+  .dash-card {
+    padding: 1.15rem 1rem;
+    border-radius: 14px;
+  }
+  .stat-value.dark-value {
+    font-size: 1.6rem;
+  }
+  .stat-value.light-value {
+    font-size: 1.3rem;
+  }
+  .footer-inner {
+    flex-direction: column;
+    gap: 0.75rem;
+    text-align: center;
+  }
 }
 </style>

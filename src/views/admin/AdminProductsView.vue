@@ -250,22 +250,44 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
 import { Add01Icon, Edit01Icon } from 'hugeicons-vue';
 import AdminNavbar from '../../components/layout/AdminNavbar.vue';
 import { useTopupStore } from '../../stores/topupStore';
+import { adminService } from '../../api/adminService';
 
 const store = useTopupStore();
 
-// Initial Mock Product Data
-const products = ref([
-  { id: 1, name: '100 Momocoin', providerCode: 'MOMO_100', basePrice: 9000, sellingPrice: 10000, status: 'active' },
-  { id: 2, name: '500 Momocoin', providerCode: 'MOMO_500', basePrice: 45000, sellingPrice: 50000, status: 'active' },
-  { id: 3, name: '1.000 Momocoin', providerCode: 'MOMO_1000', basePrice: 90000, sellingPrice: 100000, status: 'active' },
-  { id: 4, name: '5.000 Momocoin', providerCode: 'MOMO_5000', basePrice: 450000, sellingPrice: 500000, status: 'active' },
-  { id: 5, name: '10.000 Momocoin', providerCode: 'MOMO_10000', basePrice: 900000, sellingPrice: 1000000, status: 'active' },
-  { id: 6, name: 'Mobile Legends 86 Diamonds', providerCode: 'MLBB_86', basePrice: 20000, sellingPrice: 22500, status: 'inactive' }
-]);
+const products = ref([]);
+const isLoading = ref(false);
+
+const loadProducts = async () => {
+  isLoading.value = true;
+  try {
+    const res = await adminService.getProducts();
+    if (res?.data) {
+      products.value = res.data.map(p => ({
+        id: p.id,
+        name: p.name,
+        providerCode: p.provider_code || p.providerCode || '',
+        basePrice: Number(p.base_price || p.basePrice || 0),
+        sellingPrice: Number(p.selling_price || p.sellingPrice || 0),
+        status: p.status || 'active'
+      }));
+    } else {
+      products.value = [];
+    }
+  } catch (err) {
+    store.showToast(err.message || 'Gagal memuat produk dari server', 'error');
+    products.value = [];
+  } finally {
+    isLoading.value = false;
+  }
+};
+
+onMounted(() => {
+  loadProducts();
+});
 
 // Modal States
 const showAddModal = ref(false);
@@ -302,19 +324,24 @@ const closeAddModal = () => {
   showAddModal.value = false;
 };
 
-const saveNewProduct = () => {
-  const newId = products.value.length ? Math.max(...products.value.map(p => p.id)) + 1 : 1;
-  products.value.unshift({
-    id: newId,
-    name: newProduct.value.name,
-    providerCode: newProduct.value.providerCode.toUpperCase(),
-    basePrice: Number(newProduct.value.basePrice),
-    sellingPrice: Number(newProduct.value.sellingPrice),
-    status: 'active'
-  });
+const saveNewProduct = async () => {
+  try {
+    const payload = {
+      name: newProduct.value.name,
+      provider_code: newProduct.value.providerCode.toUpperCase(),
+      base_price: Number(newProduct.value.basePrice),
+      selling_price: Number(newProduct.value.sellingPrice)
+    };
 
-  store.showToast(`Produk "${newProduct.value.name}" berhasil ditambahkan!`, 'success');
-  closeAddModal();
+    const res = await adminService.createProduct(payload);
+    if (res?.success || res?.data) {
+      store.showToast(`Produk "${newProduct.value.name}" berhasil ditambahkan!`, 'success');
+      await loadProducts();
+      closeAddModal();
+    }
+  } catch (err) {
+    store.showToast(err.message || 'Gagal menambahkan produk', 'error');
+  }
 };
 
 // Edit Modal Handlers
@@ -334,20 +361,25 @@ const closeEditModal = () => {
   showEditModal.value = false;
 };
 
-const saveEditProduct = () => {
-  const index = products.value.findIndex(p => p.id === editProductForm.value.id);
-  if (index !== -1) {
-    products.value[index] = {
-      id: editProductForm.value.id,
+const saveEditProduct = async () => {
+  try {
+    const payload = {
       name: editProductForm.value.name,
-      providerCode: editProductForm.value.providerCode.toUpperCase(),
-      basePrice: Number(editProductForm.value.basePrice),
-      sellingPrice: Number(editProductForm.value.sellingPrice),
+      provider_code: editProductForm.value.providerCode.toUpperCase(),
+      base_price: Number(editProductForm.value.basePrice),
+      selling_price: Number(editProductForm.value.sellingPrice),
       status: editProductForm.value.status
     };
-    store.showToast(`Produk "${editProductForm.value.name}" berhasil diperbarui!`, 'success');
+
+    const res = await adminService.updateProduct(editProductForm.value.id, payload);
+    if (res?.success || res?.data) {
+      store.showToast(`Produk "${editProductForm.value.name}" berhasil diperbarui!`, 'success');
+      await loadProducts();
+      closeEditModal();
+    }
+  } catch (err) {
+    store.showToast(err.message || 'Gagal memperbarui produk', 'error');
   }
-  closeEditModal();
 };
 
 const showFooterInfo = (title) => {
