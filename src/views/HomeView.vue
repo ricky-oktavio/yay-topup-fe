@@ -611,7 +611,7 @@
               <div class="v3-step-number">3</div>
               <div class="v3-step-heading-info">
                 <h2 class="v3-step-title">Pilih Pembayaran</h2>
-                <p class="v3-step-desc">Pilih metode pembayaran yang ingin Anda gunakan.</p>
+                <p class="v3-step-desc">Pilih metode pembayaran yang ingin Anda gunakan. (ini hanya dummy biaya admin ditentukan oleh payment gateway)</p>
               </div>
             </div>
 
