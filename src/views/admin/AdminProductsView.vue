@@ -135,12 +135,22 @@
                 </div>
 
                 <div class="form-group col-half">
-                  <label class="form-label">Flag / Label (Opsional)</label>
+                  <label class="form-label">Flag / Badge (Opsional)</label>
+                  <select v-model="newProduct.flagType" class="form-input-styled select-styled" @change="handleNewFlagTypeChange">
+                    <option value="">-- Tanpa Flag --</option>
+                    <option value="Terlaris">Terlaris</option>
+                    <option value="Populer">Populer</option>
+                    <option value="Promo">Promo</option>
+                    <option value="Best Seller">Best Seller</option>
+                    <option value="Hot Deals">Hot Deals</option>
+                    <option value="custom">Kustom (Tulis Sendiri)...</option>
+                  </select>
                   <input 
-                    v-model="newProduct.flag" 
+                    v-if="newProduct.flagType === 'custom'"
+                    v-model="newProduct.customFlag" 
                     type="text" 
-                    class="form-input-styled" 
-                    placeholder="e.g. Terlaris, Promo, dll" 
+                    class="form-input-styled margin-top-xs" 
+                    placeholder="Tulis label flag custom..." 
                   />
                 </div>
               </div>
@@ -239,12 +249,22 @@
                 </div>
 
                 <div class="form-group col-half">
-                  <label class="form-label">Flag / Label (Opsional)</label>
+                  <label class="form-label">Flag / Badge (Opsional)</label>
+                  <select v-model="editProductForm.flagType" class="form-input-styled select-styled" @change="handleEditFlagTypeChange">
+                    <option value="">-- Tanpa Flag --</option>
+                    <option value="Terlaris">Terlaris</option>
+                    <option value="Populer">Populer</option>
+                    <option value="Promo">Promo</option>
+                    <option value="Best Seller">Best Seller</option>
+                    <option value="Hot Deals">Hot Deals</option>
+                    <option value="custom">Kustom (Tulis Sendiri)...</option>
+                  </select>
                   <input 
-                    v-model="editProductForm.flag" 
+                    v-if="editProductForm.flagType === 'custom'"
+                    v-model="editProductForm.customFlag" 
                     type="text" 
-                    class="form-input-styled" 
-                    placeholder="e.g. Terlaris, Promo, dll" 
+                    class="form-input-styled margin-top-xs" 
+                    placeholder="Tulis label flag custom..." 
                   />
                 </div>
               </div>
@@ -345,6 +365,8 @@ const store = useTopupStore();
 const products = ref([]);
 const isLoading = ref(false);
 
+const PRESET_FLAGS = ['Terlaris', 'Populer', 'Promo', 'Best Seller', 'Hot Deals'];
+
 const loadProducts = async () => {
   isLoading.value = true;
   try {
@@ -391,7 +413,8 @@ const newProduct = ref({
   sellingPrice: null,
   coinAmount: null,
   bonusCoin: 0,
-  flag: ''
+  flagType: '',
+  customFlag: ''
 });
 
 const editProductForm = ref({
@@ -402,9 +425,22 @@ const editProductForm = ref({
   sellingPrice: 0,
   coinAmount: 0,
   bonusCoin: 0,
-  flag: '',
+  flagType: '',
+  customFlag: '',
   status: 'active'
 });
+
+const handleNewFlagTypeChange = () => {
+  if (newProduct.value.flagType !== 'custom') {
+    newProduct.value.customFlag = '';
+  }
+};
+
+const handleEditFlagTypeChange = () => {
+  if (editProductForm.value.flagType !== 'custom') {
+    editProductForm.value.customFlag = '';
+  }
+};
 
 // Add Modal Handlers
 const openAddModal = () => {
@@ -415,7 +451,8 @@ const openAddModal = () => {
     sellingPrice: null,
     coinAmount: null,
     bonusCoin: 0,
-    flag: ''
+    flagType: '',
+    customFlag: ''
   };
   showAddModal.value = true;
 };
@@ -426,6 +463,13 @@ const closeAddModal = () => {
 
 const saveNewProduct = async () => {
   try {
+    let finalFlag = null;
+    if (newProduct.value.flagType === 'custom') {
+      finalFlag = newProduct.value.customFlag?.trim() || null;
+    } else if (newProduct.value.flagType) {
+      finalFlag = newProduct.value.flagType;
+    }
+
     const payload = {
       name: newProduct.value.name?.trim(),
       provider_code: newProduct.value.providerCode?.trim().toUpperCase(),
@@ -433,7 +477,7 @@ const saveNewProduct = async () => {
       selling_price: Number(newProduct.value.sellingPrice),
       coin_amount: Number(newProduct.value.coinAmount),
       bonus_coin: newProduct.value.bonusCoin ? Number(newProduct.value.bonusCoin) : 0,
-      flag: newProduct.value.flag?.trim() ? newProduct.value.flag.trim() : null
+      flag: finalFlag
     };
 
     const res = await adminService.createProduct(payload);
@@ -449,6 +493,10 @@ const saveNewProduct = async () => {
 
 // Edit Modal Handlers
 const openEditModal = (product) => {
+  const isPreset = PRESET_FLAGS.includes(product.flag);
+  const flagType = product.flag ? (isPreset ? product.flag : 'custom') : '';
+  const customFlag = isPreset ? '' : (product.flag || '');
+
   editProductForm.value = {
     id: product.id,
     name: product.name,
@@ -457,7 +505,8 @@ const openEditModal = (product) => {
     sellingPrice: product.sellingPrice,
     coinAmount: product.coinAmount,
     bonusCoin: product.bonusCoin || 0,
-    flag: product.flag || '',
+    flagType,
+    customFlag,
     status: product.status
   };
   showEditModal.value = true;
@@ -469,6 +518,13 @@ const closeEditModal = () => {
 
 const saveEditProduct = async () => {
   try {
+    let finalFlag = null;
+    if (editProductForm.value.flagType === 'custom') {
+      finalFlag = editProductForm.value.customFlag?.trim() || null;
+    } else if (editProductForm.value.flagType) {
+      finalFlag = editProductForm.value.flagType;
+    }
+
     const payload = {
       name: editProductForm.value.name?.trim(),
       provider_code: editProductForm.value.providerCode?.trim().toUpperCase(),
@@ -476,7 +532,7 @@ const saveEditProduct = async () => {
       selling_price: Number(editProductForm.value.sellingPrice),
       coin_amount: Number(editProductForm.value.coinAmount),
       bonus_coin: editProductForm.value.bonusCoin ? Number(editProductForm.value.bonusCoin) : 0,
-      flag: editProductForm.value.flag?.trim() ? editProductForm.value.flag.trim() : null,
+      flag: finalFlag,
       status: editProductForm.value.status
     };
 
@@ -864,6 +920,10 @@ const showFooterInfo = (title) => {
   font-weight: 700;
   color: #334155;
   margin-bottom: 0.35rem;
+}
+
+.margin-top-xs {
+  margin-top: 0.5rem;
 }
 
 .margin-top-sm {

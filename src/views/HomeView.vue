@@ -280,7 +280,7 @@
                     }"
                     @click="selectPackage(pkg)"
                   >
-                    <div v-if="pkg.isFeatured" class="v2-featured-tag">TERLARIS</div>
+                    <div v-if="pkg.badge" class="v2-featured-tag">{{ pkg.badge }}</div>
                     <div class="v2-pkg-left">
                       <h3 class="v2-pkg-name">{{ pkg.name }}</h3>
                       <p v-if="pkg.bonus > 0" class="v2-pkg-bonus">Bonus {{ pkg.bonus.toLocaleString('id-ID') }}</p>
@@ -928,11 +928,11 @@ onMounted(async () => {
         bonus: Number(p.bonus_coin || p.bonus || 0),
         price: Number(p.selling_price || p.price || 100000),
         coins: Number(p.coin_amount || p.amount || p.coins || 1000),
-        badge: p.flag ? p.flag.toUpperCase() : (p.badge || (idx === 0 ? 'TERLARIS' : idx === 1 ? 'POPULER' : ''))
+        badge: p.flag ? p.flag.trim().toUpperCase() : ''
       }));
       packagesList.value = v3Packages.value.map(p => ({
         ...p,
-        isFeatured: p.badge?.includes('TERLARIS') || p.badge?.includes('POPULER')
+        isFeatured: Boolean(p.badge)
       }));
       selectedPackage.value = activeVersion.value === 'v2' ? packagesList.value[0] : v3Packages.value[0];
     }
