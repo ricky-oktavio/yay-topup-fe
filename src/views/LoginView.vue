@@ -76,40 +76,7 @@
           </form>
 
           <!-- Quick Demo Mockup Accounts Box -->
-          <div class="demo-accounts-card margin-top-lg">
-            <div class="demo-header">
-              <span class="demo-badge">AKUN DEMO</span>
-              <span class="demo-title">Pilih Akun Cepat untuk Pengujian:</span>
-            </div>
-            
-            <div class="demo-buttons-grid">
-              <!-- Demo Admin -->
-              <button 
-                type="button" 
-                class="demo-account-btn admin-btn" 
-                @click="fillDemoAccount('admin')"
-                title="Login sebagai Administrator"
-              >
-                <div class="role-info">
-                  <strong class="role-title">Administrator</strong>
-                  <span class="role-email">admin@gmail.com</span>
-                </div>
-              </button>
-
-              <!-- Demo Partner Affiliate -->
-              <button 
-                type="button" 
-                class="demo-account-btn partner-btn" 
-                @click="fillDemoAccount('affiliate')"
-                title="Login sebagai Mitra Affiliate"
-              >
-                <div class="role-info">
-                  <strong class="role-title">Mitra Affiliate</strong>
-                  <span class="role-email">partner@yaytopup.com</span>
-                </div>
-              </button>
-            </div>
-          </div>
+        
 
           <!-- Register / Affiliate Footer Link -->
           <div class="login-card-footer">
