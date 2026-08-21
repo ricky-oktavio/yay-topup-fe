@@ -922,7 +922,14 @@ onMounted(async () => {
   try {
     const apiProducts = await store.fetchProducts('momolive');
     if (apiProducts && apiProducts.data && apiProducts.data.length > 0) {
-      v3Packages.value = apiProducts.data.map((p, idx) => ({
+      // Urutkan paket koin dari yang terkecil ke terbesar
+      const sortedList = [...apiProducts.data].sort((a, b) => {
+        const coinA = Number(a.coin_amount || a.coins || a.base_price || 0);
+        const coinB = Number(b.coin_amount || b.coins || b.base_price || 0);
+        return coinA - coinB;
+      });
+
+      v3Packages.value = sortedList.map((p, idx) => ({
         id: p.id || idx + 1,
         name: p.name || `${Number(p.coin_amount || 1000).toLocaleString('id-ID')} Coins`,
         bonus: Number(p.bonus_coin || p.bonus || 0),
