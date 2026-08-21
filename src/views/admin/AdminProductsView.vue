@@ -35,6 +35,7 @@
                 <tr>
                   <th>Nama Produk</th>
                   <th>Provider Code</th>
+                  <th>Jumlah Koin</th>
                   <th>Harga Dasar</th>
                   <th>Harga Jual</th>
                   <th>Status</th>
@@ -43,9 +44,20 @@
               </thead>
               <tbody>
                 <tr v-for="product in products" :key="product.id" class="table-row">
-                  <td class="font-bold text-dark">{{ product.name }}</td>
+                  <td>
+                    <div class="product-name-col">
+                      <span class="font-bold text-dark">{{ product.name }}</span>
+                      <span v-if="product.flag" class="product-flag-badge">{{ product.flag }}</span>
+                    </div>
+                  </td>
                   <td>
                     <code class="provider-code-badge">{{ product.providerCode }}</code>
+                  </td>
+                  <td>
+                    <div class="coin-col">
+                      <span class="font-semibold text-dark">{{ Number(product.coinAmount || 0).toLocaleString('id-ID') }} Koin</span>
+                      <span v-if="product.bonusCoin > 0" class="text-bonus">+{{ Number(product.bonusCoin).toLocaleString('id-ID') }} Bonus</span>
+                    </div>
                   </td>
                   <td class="text-muted">Rp {{ product.basePrice.toLocaleString('id-ID') }}</td>
                   <td class="font-semibold text-purple">Rp {{ product.sellingPrice.toLocaleString('id-ID') }}</td>
@@ -65,7 +77,7 @@
                   </td>
                 </tr>
                 <tr v-if="products.length === 0">
-                  <td colspan="6" class="text-center py-5 text-muted">Belum ada produk terdaftar.</td>
+                  <td colspan="7" class="text-center py-5 text-muted">Belum ada produk terdaftar.</td>
                 </tr>
               </tbody>
             </table>
@@ -100,49 +112,86 @@
           <form @submit.prevent="saveNewProduct">
             <div class="modal-body">
               <div class="form-group">
-                <label class="form-label">Nama Produk</label>
+                <label class="form-label">Nama Produk <span class="text-danger">*</span></label>
                 <input 
                   v-model="newProduct.name" 
                   type="text" 
                   required 
                   class="form-input-styled" 
-                  placeholder="e.g. 500 Momocoin" 
-                />
-              </div>
-
-              <div class="form-group margin-top-sm">
-                <label class="form-label">Provider Code</label>
-                <input 
-                  v-model="newProduct.providerCode" 
-                  type="text" 
-                  required 
-                  class="form-input-styled" 
-                  placeholder="e.g. MOMO_500" 
+                  placeholder="e.g. Momo Live 500.000 Koin (+5.000 Bonus)" 
                 />
               </div>
 
               <div class="form-row margin-top-sm">
                 <div class="form-group col-half">
-                  <label class="form-label">Harga Dasar (Rp)</label>
+                  <label class="form-label">Provider Code <span class="text-danger">*</span></label>
+                  <input 
+                    v-model="newProduct.providerCode" 
+                    type="text" 
+                    required 
+                    class="form-input-styled" 
+                    placeholder="e.g. MOMO_500K" 
+                  />
+                </div>
+
+                <div class="form-group col-half">
+                  <label class="form-label">Flag / Label (Opsional)</label>
+                  <input 
+                    v-model="newProduct.flag" 
+                    type="text" 
+                    class="form-input-styled" 
+                    placeholder="e.g. Terlaris, Promo, dll" 
+                  />
+                </div>
+              </div>
+
+              <div class="form-row margin-top-sm">
+                <div class="form-group col-half">
+                  <label class="form-label">Jumlah Koin Utama <span class="text-danger">*</span></label>
+                  <input 
+                    v-model.number="newProduct.coinAmount" 
+                    type="number" 
+                    required 
+                    min="0"
+                    class="form-input-styled" 
+                    placeholder="e.g. 500000" 
+                  />
+                </div>
+
+                <div class="form-group col-half">
+                  <label class="form-label">Bonus Koin (Opsional)</label>
+                  <input 
+                    v-model.number="newProduct.bonusCoin" 
+                    type="number" 
+                    min="0"
+                    class="form-input-styled" 
+                    placeholder="e.g. 5000" 
+                  />
+                </div>
+              </div>
+
+              <div class="form-row margin-top-sm">
+                <div class="form-group col-half">
+                  <label class="form-label">Harga Dasar (Rp) <span class="text-danger">*</span></label>
                   <input 
                     v-model.number="newProduct.basePrice" 
                     type="number" 
                     required 
                     min="0"
                     class="form-input-styled" 
-                    placeholder="e.g. 45000" 
+                    placeholder="e.g. 450000" 
                   />
                 </div>
 
                 <div class="form-group col-half">
-                  <label class="form-label">Harga Jual (Rp)</label>
+                  <label class="form-label">Harga Jual (Rp) <span class="text-danger">*</span></label>
                   <input 
                     v-model.number="newProduct.sellingPrice" 
                     type="number" 
                     required 
                     min="0"
                     class="form-input-styled" 
-                    placeholder="e.g. 50000" 
+                    placeholder="e.g. 500000" 
                   />
                 </div>
               </div>
@@ -169,7 +218,7 @@
           <form @submit.prevent="saveEditProduct">
             <div class="modal-body">
               <div class="form-group">
-                <label class="form-label">Nama Produk</label>
+                <label class="form-label">Nama Produk <span class="text-danger">*</span></label>
                 <input 
                   v-model="editProductForm.name" 
                   type="text" 
@@ -178,19 +227,54 @@
                 />
               </div>
 
-              <div class="form-group margin-top-sm">
-                <label class="form-label">Provider Code</label>
-                <input 
-                  v-model="editProductForm.providerCode" 
-                  type="text" 
-                  required 
-                  class="form-input-styled" 
-                />
+              <div class="form-row margin-top-sm">
+                <div class="form-group col-half">
+                  <label class="form-label">Provider Code <span class="text-danger">*</span></label>
+                  <input 
+                    v-model="editProductForm.providerCode" 
+                    type="text" 
+                    required 
+                    class="form-input-styled" 
+                  />
+                </div>
+
+                <div class="form-group col-half">
+                  <label class="form-label">Flag / Label (Opsional)</label>
+                  <input 
+                    v-model="editProductForm.flag" 
+                    type="text" 
+                    class="form-input-styled" 
+                    placeholder="e.g. Terlaris, Promo, dll" 
+                  />
+                </div>
               </div>
 
               <div class="form-row margin-top-sm">
                 <div class="form-group col-half">
-                  <label class="form-label">Harga Dasar (Rp)</label>
+                  <label class="form-label">Jumlah Koin Utama <span class="text-danger">*</span></label>
+                  <input 
+                    v-model.number="editProductForm.coinAmount" 
+                    type="number" 
+                    required 
+                    min="0"
+                    class="form-input-styled" 
+                  />
+                </div>
+
+                <div class="form-group col-half">
+                  <label class="form-label">Bonus Koin (Opsional)</label>
+                  <input 
+                    v-model.number="editProductForm.bonusCoin" 
+                    type="number" 
+                    min="0"
+                    class="form-input-styled" 
+                  />
+                </div>
+              </div>
+
+              <div class="form-row margin-top-sm">
+                <div class="form-group col-half">
+                  <label class="form-label">Harga Dasar (Rp) <span class="text-danger">*</span></label>
                   <input 
                     v-model.number="editProductForm.basePrice" 
                     type="number" 
@@ -201,7 +285,7 @@
                 </div>
 
                 <div class="form-group col-half">
-                  <label class="form-label">Harga Jual (Rp)</label>
+                  <label class="form-label">Harga Jual (Rp) <span class="text-danger">*</span></label>
                   <input 
                     v-model.number="editProductForm.sellingPrice" 
                     type="number" 
@@ -279,6 +363,9 @@ const loadProducts = async () => {
       providerCode: p.provider_code || p.providerCode || '',
       basePrice: Number(p.base_price || p.basePrice || 0),
       sellingPrice: Number(p.selling_price || p.sellingPrice || 0),
+      coinAmount: Number(p.coin_amount || p.coinAmount || 0),
+      bonusCoin: Number(p.bonus_coin || p.bonusCoin || 0),
+      flag: p.flag || '',
       status: p.status || 'active'
     }));
   } catch (err) {
@@ -300,8 +387,11 @@ const showEditModal = ref(false);
 const newProduct = ref({
   name: '',
   providerCode: '',
-  basePrice: 0,
-  sellingPrice: 0
+  basePrice: null,
+  sellingPrice: null,
+  coinAmount: null,
+  bonusCoin: 0,
+  flag: ''
 });
 
 const editProductForm = ref({
@@ -310,6 +400,9 @@ const editProductForm = ref({
   providerCode: '',
   basePrice: 0,
   sellingPrice: 0,
+  coinAmount: 0,
+  bonusCoin: 0,
+  flag: '',
   status: 'active'
 });
 
@@ -319,7 +412,10 @@ const openAddModal = () => {
     name: '',
     providerCode: '',
     basePrice: null,
-    sellingPrice: null
+    sellingPrice: null,
+    coinAmount: null,
+    bonusCoin: 0,
+    flag: ''
   };
   showAddModal.value = true;
 };
@@ -331,10 +427,13 @@ const closeAddModal = () => {
 const saveNewProduct = async () => {
   try {
     const payload = {
-      name: newProduct.value.name,
-      provider_code: newProduct.value.providerCode.toUpperCase(),
+      name: newProduct.value.name?.trim(),
+      provider_code: newProduct.value.providerCode?.trim().toUpperCase(),
       base_price: Number(newProduct.value.basePrice),
-      selling_price: Number(newProduct.value.sellingPrice)
+      selling_price: Number(newProduct.value.sellingPrice),
+      coin_amount: Number(newProduct.value.coinAmount),
+      bonus_coin: newProduct.value.bonusCoin ? Number(newProduct.value.bonusCoin) : 0,
+      flag: newProduct.value.flag?.trim() ? newProduct.value.flag.trim() : null
     };
 
     const res = await adminService.createProduct(payload);
@@ -356,6 +455,9 @@ const openEditModal = (product) => {
     providerCode: product.providerCode,
     basePrice: product.basePrice,
     sellingPrice: product.sellingPrice,
+    coinAmount: product.coinAmount,
+    bonusCoin: product.bonusCoin || 0,
+    flag: product.flag || '',
     status: product.status
   };
   showEditModal.value = true;
@@ -368,10 +470,13 @@ const closeEditModal = () => {
 const saveEditProduct = async () => {
   try {
     const payload = {
-      name: editProductForm.value.name,
-      provider_code: editProductForm.value.providerCode.toUpperCase(),
+      name: editProductForm.value.name?.trim(),
+      provider_code: editProductForm.value.providerCode?.trim().toUpperCase(),
       base_price: Number(editProductForm.value.basePrice),
       selling_price: Number(editProductForm.value.sellingPrice),
+      coin_amount: Number(editProductForm.value.coinAmount),
+      bonus_coin: editProductForm.value.bonusCoin ? Number(editProductForm.value.bonusCoin) : 0,
+      flag: editProductForm.value.flag?.trim() ? editProductForm.value.flag.trim() : null,
       status: editProductForm.value.status
     };
 
@@ -675,11 +780,45 @@ const showFooterInfo = (title) => {
   padding: 1.5rem;
 }
 
+.product-name-col {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.product-flag-badge {
+  background: linear-gradient(135deg, #ffedd5 0%, #fed7aa 100%);
+  color: #ea580c;
+  border: 1px solid rgba(234, 88, 12, 0.2);
+  font-size: 0.725rem;
+  font-weight: 700;
+  padding: 0.15rem 0.5rem;
+  border-radius: 6px;
+  letter-spacing: 0.02em;
+}
+
+.coin-col {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.text-bonus {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #10b981;
+}
+
+.text-danger {
+  color: #ef4444;
+}
+
 .modal-card {
   background: #ffffff;
   border-radius: 16px;
   width: 100%;
-  max-width: 480px;
+  max-width: 540px;
   box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
   overflow: hidden;
 }

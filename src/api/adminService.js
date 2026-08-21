@@ -12,7 +12,7 @@ export const adminService = {
   /**
    * Add a product to the catalog
    * POST /api/v1/admin/products
-   * @param {Object} payload { name, provider_code, base_price, selling_price }
+   * @param {Object} payload { name, provider_code, base_price, selling_price, coin_amount, bonus_coin, flag }
    */
   async createProduct(payload) {
     return axiosClient.post('/admin/products', payload);
