@@ -31,6 +31,7 @@ export const useTopupStore = defineStore('topup', {
     isLoggedIn: !!localStorage.getItem('yaytopup_auth_token'),
     user: JSON.parse(localStorage.getItem('yaytopup_user_data') || 'null'),
     accessToken: localStorage.getItem('yaytopup_auth_token') || '',
+    refreshToken: localStorage.getItem('yaytopup_refresh_token') || '',
 
     // Global Notification Toasts
     toast: {
@@ -153,12 +154,16 @@ export const useTopupStore = defineStore('topup', {
       try {
         const res = await authService.login(credentials);
         if (res && res.data) {
-          const { access_token, user } = res.data;
+          const { access_token, refresh_token, user } = res.data;
           this.accessToken = access_token;
+          this.refreshToken = refresh_token || '';
           this.user = user || { email: credentials.email, role: 'admin' };
           this.isLoggedIn = true;
 
           localStorage.setItem('yaytopup_auth_token', access_token);
+          if (refresh_token) {
+            localStorage.setItem('yaytopup_refresh_token', refresh_token);
+          }
           localStorage.setItem('yaytopup_user_data', JSON.stringify(this.user));
           this.showToast('Login berhasil!', 'success');
           return { success: true, user: this.user };
@@ -175,7 +180,9 @@ export const useTopupStore = defineStore('topup', {
       this.isLoggedIn = false;
       this.user = null;
       this.accessToken = '';
+      this.refreshToken = '';
       localStorage.removeItem('yaytopup_auth_token');
+      localStorage.removeItem('yaytopup_refresh_token');
       localStorage.removeItem('yaytopup_user_data');
       this.showToast('Anda telah logout.', 'info');
     }

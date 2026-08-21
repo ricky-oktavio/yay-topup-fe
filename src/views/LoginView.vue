@@ -75,9 +75,6 @@
             </button>
           </form>
 
-          <!-- Quick Demo Mockup Accounts Box -->
-        
-
           <!-- Register / Affiliate Footer Link -->
           <div class="login-card-footer">
             <span class="muted-text">Belum punya akun?</span>
