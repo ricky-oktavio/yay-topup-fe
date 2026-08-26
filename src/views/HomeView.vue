@@ -665,10 +665,10 @@
                 <span class="lbl">Jumlah Koin:</span>
                 <span class="val">{{ v3CoinLabel }}</span>
               </div>
-              <div class="v3-s-row">
+              <!-- <div class="v3-s-row">
                 <span class="lbl">Metode Bayar:</span>
                 <span class="val">{{ activeMethodObj?.name || 'QRIS' }}</span>
-              </div>
+              </div> -->
               <div class="v3-s-row total">
                 <span class="lbl">Total Pembayaran:</span>
                 <span class="price">Rp {{ v3FinalPrice.toLocaleString('id-ID') }}</span>
