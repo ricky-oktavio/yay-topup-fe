@@ -52,7 +52,7 @@ const router = useRouter();
 const store = useTopupStore();
 
 const handleLogout = () => {
-  store.showToast('Anda telah logout dari Admin YayTopup.', 'info');
+  store.logoutUser();
   router.push('/login');
 };
 </script>

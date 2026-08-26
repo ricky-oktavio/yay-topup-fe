@@ -163,7 +163,7 @@ const router = createRouter({
   }
 });
 
-// Navigation guard for document titles & Open Graph meta tags
+// Navigation guard for document titles & auth protection
 router.beforeEach((to, from, next) => {
   const pageTitle = to.meta.title || 'YayTopup - Platform Topup Game & E-Wallet';
   document.title = pageTitle;
@@ -179,7 +179,15 @@ router.beforeEach((to, from, next) => {
     twitterTitleElement.setAttribute('content', pageTitle);
   }
 
-  next();
+  // Auth Guard: Require access token for protected admin & affiliate routes
+  const requiresAuth = to.path.startsWith('/admin') || to.path.startsWith('/affiliate/dashboard');
+  const token = localStorage.getItem('yaytopup_auth_token');
+
+  if (requiresAuth && !token) {
+    next('/login');
+  } else {
+    next();
+  }
 });
 
 export default router;

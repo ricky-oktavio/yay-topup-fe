@@ -24,7 +24,7 @@
           <button class="user-avatar-btn" title="Akun Saya" @click="handleProfile">
             <UserIcon :size="20" class="huge-icon" />
           </button>
-          <button class="btn-logout-icon" title="Logout" @click="store.logoutUser">
+          <button class="btn-logout-icon" title="Logout" @click="handleLogout">
             <Logout01Icon :size="18" />
           </button>
         </template>
@@ -41,9 +41,15 @@ import { useTopupStore } from '../../stores/topupStore';
 const router = useRouter();
 const store = useTopupStore();
 
+const handleLogout = () => {
+  store.logoutUser();
+  router.push('/login');
+};
+
 const handleProfile = () => {
   const token = store.accessToken || localStorage.getItem('yaytopup_auth_token');
-  if (!token) {
+  if (!store.isLoggedIn || !token) {
+    store.showToast('Silakan login terlebih dahulu.', 'warning');
     router.push('/login');
     return;
   }
