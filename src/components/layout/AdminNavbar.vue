@@ -16,6 +16,7 @@
         <router-link to="/admin/products" class="admin-nav-item">Produk</router-link>
         <router-link to="/admin/withdrawal" class="admin-nav-item">Withdrawal</router-link>
         <router-link to="/admin/transactions" class="admin-nav-item">Transaksi</router-link>
+        <router-link to="/admin/messages" class="admin-nav-item">Pesan</router-link>
         <router-link to="/admin/settings" class="admin-nav-item">Settings</router-link>
       </nav>
 

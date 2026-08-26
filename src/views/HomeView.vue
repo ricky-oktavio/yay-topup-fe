@@ -606,66 +606,7 @@
           </div>
 
           <!-- LANGKAH 3: PILIH METODE PEMBAYARAN -->
-          <div class="v3-step-card">
-            <div class="v3-step-heading">
-              <div class="v3-step-number">3</div>
-              <div class="v3-step-heading-info">
-                <h2 class="v3-step-title">Pilih Pembayaran</h2>
-                <p class="v3-step-desc">Pilih metode pembayaran yang ingin Anda gunakan. (ini hanya dummy biaya admin ditentukan oleh payment gateway)</p>
-              </div>
-            </div>
-
-            <div class="v3-step-content">
-              <div class="v3-accordions-list">
-                <div 
-                  v-for="cat in paymentCategories" 
-                  :key="cat.id"
-                  class="v3-accordion-card"
-                >
-                  <!-- Header -->
-                  <div 
-                    class="v3-acc-header"
-                    @click="expandedCategory = expandedCategory === cat.id ? null : cat.id"
-                  >
-                    <div class="v3-acc-left">
-                      <span class="v3-acc-title">{{ cat.title }}</span>
-                      <span v-if="cat.title.includes('QRIS')" class="v3-acc-badge">BEBAS BIAYA</span>
-                    </div>
-                    <div class="v3-acc-right">
-                      <span class="v3-acc-chevron">{{ expandedCategory === cat.id ? '▲' : '▼' }}</span>
-                    </div>
-                  </div>
-
-                  <!-- Body -->
-                  <div v-show="expandedCategory === cat.id" class="v3-acc-body">
-                    <div 
-                      v-for="method in cat.methods" 
-                      :key="method.code"
-                      class="v3-method-item"
-                      :class="{ active: selectedPaymentCode === method.code }"
-                      @click="selectedPaymentCode = method.code"
-                    >
-                      <div class="v3-method-left">
-                        <div class="v3-radio-circle">
-                          <div class="v3-radio-dot"></div>
-                        </div>
-                        <div class="v3-method-info">
-                          <h4 class="v3-method-name">{{ method.name }}</h4>
-                          <span class="v3-method-speed">Otomatis 24 Jam</span>
-                        </div>
-                      </div>
-
-                      <div class="v3-method-right">
-                        <span class="v3-method-price">Rp {{ calculateMethodTotal(method).toLocaleString('id-ID') }}</span>
-                        <span v-if="method.fee === 0" class="v3-free-text">Bebas Biaya Admin</span>
-                        <span v-else class="v3-fee-text">+Admin Rp {{ method.fee.toLocaleString('id-ID') }}</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
+          
 
           <!-- LANGKAH 4: KONTAK & REFERAL -->
           <div class="v3-step-card">
@@ -681,14 +622,14 @@
               <div class="v3-fields-grid">
                 <!-- WhatsApp -->
                 <div class="v3-form-group">
-                  <label class="v3-label">Nomor WhatsApp <span class="v3-req">*</span></label>
+                  <label class="v3-label">Nomor WhatsApp (Opsional)<span class="v3-req"></span></label>
                   <input 
                     v-model="whatsappNumber" 
                     type="tel" 
                     class="v3-input-field" 
                     placeholder="Contoh: 081234567890"
                   />
-                  <span class="v3-input-hint">Bukti pembayaran akan dikirim ke nomor ini.</span>
+                  <!-- <span class="v3-input-hint">Bukti pembayaran akan dikirim ke nomor ini.</span> -->
                 </div>
 
                 <!-- Referral -->
@@ -794,10 +735,10 @@
               <span class="lbl">Jumlah Koin:</span>
               <span class="val">{{ selectedCoinLabel }}</span>
             </div>
-            <div class="v2-modal-row">
+            <!-- <div class="v2-modal-row">
               <span class="lbl">Metode Bayar:</span>
               <span class="val">{{ activeMethodObj?.name || 'QRIS' }}</span>
-            </div>
+            </div> -->
             <div class="v2-modal-row">
               <span class="lbl">WhatsApp:</span>
               <span class="val">{{ whatsappNumber || '-' }}</span>
@@ -1084,18 +1025,25 @@ const proceedCheckout = async () => {
       referralCode: referralCode.value || '-',
       coinAmount: finalCoins,
       totalPrice: currentFinalPrice.value,
-      paymentMethod: activeMethodObj.value?.name || 'QRIS',
+      paymentMethod: activeMethodObj.value?.name || 'Duitku Payment',
       whatsapp: whatsappNumber.value || '-'
     });
 
-    // Call live checkout API
-    await store.submitCheckout({
+    // Call live checkout API: POST /api/v1/topup/checkout
+    const res = await store.submitCheckout({
       product_id: productId,
       target_user_id: momocoinId.value,
       affiliate_code: referralCode.value || undefined
     });
 
-    router.push('/payment');
+    if (res?.success && res?.invoice_url) {
+      // Redirect directly to the Duitku payment gateway invoice URL
+      window.location.href = res.invoice_url;
+    } else {
+      router.push('/payment');
+    }
+  } catch (err) {
+    store.showToast(err.message || 'Gagal memproses pembayaran.', 'error');
   } finally {
     isLoading.value = false;
   }

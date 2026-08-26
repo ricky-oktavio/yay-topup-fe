@@ -70,10 +70,16 @@
                     </span>
                   </td>
                   <td class="text-right">
-                    <button class="btn-edit-action" @click="openEditModal(product)">
-                      <Edit01Icon :size="16" class="action-icon" />
-                      <span>Edit</span>
-                    </button>
+                    <div class="action-buttons-group">
+                      <button class="btn-edit-action" @click="openEditModal(product)">
+                        <Edit01Icon :size="16" class="action-icon" />
+                        <span>Edit</span>
+                      </button>
+                      <button class="btn-delete-action" @click="openDeleteModal(product)">
+                        <Delete02Icon :size="16" class="action-icon" />
+                        <span>Hapus</span>
+                      </button>
+                    </div>
                   </td>
                 </tr>
                 <tr v-if="products.length === 0">
@@ -334,6 +340,52 @@
       </div>
     </Transition>
 
+    <!-- Modal: Konfirmasi Hapus Produk -->
+    <Transition name="modal-fade">
+      <div v-if="showDeleteModal" class="modal-overlay" @click.self="closeDeleteModal">
+        <div class="modal-card delete-confirm-card">
+          <div class="delete-modal-header">
+            <div class="danger-icon-wrapper">
+              <Delete02Icon :size="28" class="danger-icon" />
+            </div>
+            <h3 class="delete-modal-title">Hapus Produk</h3>
+            <p class="delete-modal-subtitle">Apakah Anda yakin ingin menghapus produk ini dari katalog?</p>
+          </div>
+
+          <div class="delete-modal-body" v-if="productToDelete">
+            <div class="delete-info-box">
+              <div class="delete-info-row">
+                <span class="info-label">Nama Produk:</span>
+                <strong class="info-val text-dark">{{ productToDelete.name }}</strong>
+              </div>
+              <div class="delete-info-row">
+                <span class="info-label">Provider Code:</span>
+                <code class="info-val code-val">{{ productToDelete.providerCode }}</code>
+              </div>
+              <div class="delete-info-row">
+                <span class="info-label">Harga Jual:</span>
+                <strong class="info-val text-purple">Rp {{ productToDelete.sellingPrice.toLocaleString('id-ID') }}</strong>
+              </div>
+            </div>
+            <p class="delete-warning-note">⚠️ Produk yang dihapus akan disembunyikan dari daftar katalog top-up pelanggan.</p>
+          </div>
+
+          <div class="delete-modal-footer">
+            <button type="button" class="btn btn-outline" @click="closeDeleteModal" :disabled="isDeleting">
+              Batal
+            </button>
+            <button type="button" class="btn btn-danger-gradient" @click="confirmDeleteProduct" :disabled="isDeleting">
+              <span v-if="isDeleting">Menghapus...</span>
+              <span v-else class="btn-flex-inner">
+                <Delete02Icon :size="16" />
+                Ya, Hapus Produk
+              </span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </Transition>
+
     <!-- Admin Footer -->
     <footer class="admin-footer">
       <div class="admin-container footer-inner">
@@ -355,7 +407,7 @@
 
 <script setup>
 import { ref, onMounted } from 'vue';
-import { Add01Icon, Edit01Icon } from 'hugeicons-vue';
+import { Add01Icon, Edit01Icon, Delete02Icon } from 'hugeicons-vue';
 import AdminNavbar from '../../components/layout/AdminNavbar.vue';
 import { useTopupStore } from '../../stores/topupStore';
 import { adminService } from '../../api/adminService';
@@ -544,6 +596,41 @@ const saveEditProduct = async () => {
     }
   } catch (err) {
     store.showToast(err.message || 'Gagal memperbarui produk', 'error');
+  }
+};
+
+// Delete Modal Handlers
+const showDeleteModal = ref(false);
+const productToDelete = ref(null);
+const isDeleting = ref(false);
+
+const openDeleteModal = (product) => {
+  productToDelete.value = product;
+  showDeleteModal.value = true;
+};
+
+const closeDeleteModal = () => {
+  showDeleteModal.value = false;
+  productToDelete.value = null;
+};
+
+const confirmDeleteProduct = async () => {
+  if (!productToDelete.value) return;
+
+  isDeleting.value = true;
+  try {
+    const res = await adminService.deleteProduct(productToDelete.value.id);
+    if (res?.success || res?.data) {
+      store.showToast(`Produk "${productToDelete.value.name}" berhasil dihapus.`, 'success');
+    } else {
+      store.showToast(`Produk "${productToDelete.value.name}" berhasil dihapus.`, 'success');
+    }
+    await loadProducts();
+    closeDeleteModal();
+  } catch (err) {
+    store.showToast(err.response?.data?.message || err.message || 'Gagal menghapus produk.', 'error');
+  } finally {
+    isDeleting.value = false;
   }
 };
 
@@ -757,18 +844,24 @@ const showFooterInfo = (title) => {
   color: #64748b;
 }
 
+.action-buttons-group {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
 .btn-edit-action {
   background: #ffffff;
   border: 1px solid #cbd5e1;
   color: #334155;
-  padding: 0.4rem 0.9rem;
+  padding: 0.4rem 0.8rem;
   border-radius: 8px;
   font-size: 0.85rem;
   font-weight: 600;
   cursor: pointer;
   display: inline-flex;
   align-items: center;
-  gap: 0.4rem;
+  gap: 0.35rem;
   transition: all 0.15s ease;
 }
 
@@ -776,6 +869,27 @@ const showFooterInfo = (title) => {
   background: #f8fafc;
   border-color: #7c3aed;
   color: #7c3aed;
+}
+
+.btn-delete-action {
+  background: #ffffff;
+  border: 1px solid #fee2e2;
+  color: #ef4444;
+  padding: 0.4rem 0.8rem;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  transition: all 0.15s ease;
+}
+
+.btn-delete-action:hover {
+  background: #fef2f2;
+  border-color: #ef4444;
+  color: #dc2626;
 }
 
 /* Pagination */
@@ -877,6 +991,127 @@ const showFooterInfo = (title) => {
   max-width: 540px;
   box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
   overflow: hidden;
+}
+
+/* Delete Confirmation Modal Styling */
+.delete-confirm-card {
+  max-width: 460px;
+  text-align: center;
+  border-radius: 20px;
+  box-shadow: 0 25px 50px -12px rgba(225, 29, 72, 0.25);
+}
+
+.delete-modal-header {
+  padding: 2rem 1.75rem 1rem 1.75rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.danger-icon-wrapper {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: #ffe4e6;
+  color: #e11d48;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1rem;
+  box-shadow: 0 8px 20px rgba(225, 29, 72, 0.2);
+}
+
+.delete-modal-title {
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.delete-modal-subtitle {
+  font-size: 0.875rem;
+  color: #64748b;
+  margin-top: 0.35rem;
+}
+
+.delete-modal-body {
+  padding: 0 1.75rem 1.5rem 1.75rem;
+}
+
+.delete-info-box {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 1rem;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 0.85rem;
+}
+
+.delete-info-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.85rem;
+}
+
+.delete-info-row .info-label {
+  color: #64748b;
+  font-weight: 500;
+}
+
+.delete-info-row .code-val {
+  background: #eff6ff;
+  color: #2563eb;
+  padding: 0.15rem 0.45rem;
+  border-radius: 4px;
+  font-size: 0.8rem;
+}
+
+.delete-warning-note {
+  font-size: 0.775rem;
+  color: #94a3b8;
+  margin: 0;
+  text-align: center;
+}
+
+.delete-modal-footer {
+  padding: 1.25rem 1.75rem;
+  background: #f8fafc;
+  border-top: 1px solid #e2e8f0;
+  display: flex;
+  gap: 0.75rem;
+  justify-content: flex-end;
+}
+
+.delete-modal-footer button {
+  flex: 1;
+}
+
+.btn-danger-gradient {
+  background: linear-gradient(135deg, #e11d48 0%, #be123c 100%);
+  color: #ffffff;
+  border: none;
+  padding: 0.7rem 1.2rem;
+  border-radius: 10px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(225, 29, 72, 0.35);
+  transition: all 0.2s ease;
+}
+
+.btn-danger-gradient:hover:not(:disabled) {
+  background: linear-gradient(135deg, #be123c 0%, #9f1239 100%);
+  transform: translateY(-1px);
+}
+
+.btn-flex-inner {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
 }
 
 .modal-header {

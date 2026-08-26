@@ -23,6 +23,7 @@ import AdminAffiliateView from '../views/admin/AdminAffiliateView.vue';
 import AdminWithdrawalView from '../views/admin/AdminWithdrawalView.vue';
 import AdminTransactionsView from '../views/admin/AdminTransactionsView.vue';
 import AdminSettingsView from '../views/admin/AdminSettingsView.vue';
+import AdminMessagesView from '../views/admin/AdminMessagesView.vue';
 
 const routes = [
   {
@@ -78,6 +79,12 @@ const routes = [
     name: 'admin-transactions',
     component: AdminTransactionsView,
     meta: { title: 'Monitor Transaksi - YayTopup Admin' }
+  },
+  {
+    path: '/admin/messages',
+    name: 'admin-messages',
+    component: AdminMessagesView,
+    meta: { title: 'Pesan & Dukungan - YayTopup Admin' }
   },
   {
     path: '/admin/settings',

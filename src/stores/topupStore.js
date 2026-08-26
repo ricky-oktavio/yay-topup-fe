@@ -106,32 +106,38 @@ export const useTopupStore = defineStore('topup', {
           affiliate_code: payload.affiliate_code || payload.referralCode || undefined
         });
 
-        if (res && res.data) {
-          const trx = res.data;
-          this.currentOrder.transactionId = trx.id || trx.transaction_id || '';
-          this.currentOrder.invoiceUrl = trx.invoice_url || trx.payment_url || '';
+        const resData = res?.data?.data || res?.data || res;
+        const invoiceUrl = resData?.invoice_url || resData?.invoiceUrl || '';
+        const transactionId = resData?.transaction_id || resData?.transactionId || resData?.id || '';
+        const duitkuRef = resData?.duitku_reference || resData?.duitkuReference || '';
+
+        if (invoiceUrl || transactionId) {
+          this.currentOrder.transactionId = transactionId;
+          this.currentOrder.invoiceUrl = invoiceUrl;
+          this.currentOrder.duitkuReference = duitkuRef;
           
           // Prepend to local history
           this.transactions.unshift({
-            id: trx.id || `TRX-${Date.now().toString().slice(-6)}`,
-            productName: trx.product_name || 'Momo Live Coin',
-            denominationLabel: `${this.currentOrder.coinAmount.toLocaleString('id-ID')} Koin`,
+            id: transactionId || `TRX-${Date.now().toString().slice(-6)}`,
+            productName: 'Momo Live Coin',
+            denominationLabel: `${(Number(this.currentOrder.coinAmount) || 0).toLocaleString('id-ID')} Koin`,
             targetAccount: this.currentOrder.momocoinId,
-            paymentMethod: this.currentOrder.paymentMethod || 'QRIS',
+            paymentMethod: this.currentOrder.paymentMethod || 'Duitku Payment',
             amount: this.currentOrder.totalPrice,
-            status: trx.status || 'PENDING',
-            referenceNo: trx.reference_no || trx.id || `REF-${Date.now()}`,
+            status: 'PENDING',
+            referenceNo: duitkuRef || transactionId,
             createdAt: new Date().toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' }),
-            invoiceUrl: trx.invoice_url || ''
+            invoiceUrl: invoiceUrl
           });
 
-          this.showToast('Pesanan berhasil dibuat. Silakan selesaikan pembayaran.', 'success');
-          return { success: true, data: trx };
+          this.showToast('Pesanan berhasil dibuat. Mengarahkan ke pembayaran...', 'success');
+          return { success: true, invoice_url: invoiceUrl, transaction_id: transactionId, data: resData };
         }
 
         return { success: false, error: res };
       } catch (err) {
-        this.showToast(err.message || 'Gagal memproses pesanan ke server', 'error');
+        const errMsg = err.response?.data?.message || err.message || 'Gagal memproses pesanan ke server';
+        this.showToast(errMsg, 'error');
         return { success: false, error: err };
       } finally {
         this.isLoadingCheckout = false;

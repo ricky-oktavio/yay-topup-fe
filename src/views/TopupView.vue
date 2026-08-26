@@ -258,20 +258,23 @@ const formatNumber = (num) => {
 const handleCheckout = async () => {
   if (!isFormValid.value) return;
 
-  const payload = {
-    productId: product.value.id,
-    productName: product.value.name,
-    denominationId: selectedDenom.value.id,
-    denominationLabel: selectedDenom.value.label,
-    targetAccount: targetAccount.value,
-    paymentMethodId: selectedPayment.value.id,
-    paymentMethodName: selectedPayment.value.name,
-    amount: totalAmount.value
-  };
+  const res = await store.submitCheckout({
+    product_id: product.value?.id,
+    target_user_id: targetAccount.value,
+    affiliate_code: undefined
+  });
 
-  const res = await store.submitTopupOrder(payload);
-  if (res.success) {
-    receiptTransaction.value = res.transaction;
+  if (res?.success && res?.invoice_url) {
+    window.location.href = res.invoice_url;
+  } else if (res?.success && res?.data) {
+    receiptTransaction.value = {
+      id: res.data.transaction_id || res.data.id || 'TRX-SUCCESS',
+      referenceNo: res.data.duitku_reference || res.data.reference_no || 'REF-OK',
+      productName: product.value?.name || 'Topup Coin',
+      targetAccount: targetAccount.value,
+      denominationLabel: selectedDenom.value?.label || 'Koin',
+      amount: totalAmount.value
+    };
   }
 };
 

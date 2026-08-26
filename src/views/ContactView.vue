@@ -162,6 +162,7 @@
 import { ref } from 'vue';
 import { Mail01Icon, Location01Icon, ArrowRight01Icon } from 'hugeicons-vue';
 import { useTopupStore } from '../stores/topupStore';
+import { contactService } from '../api/contactService';
 
 const store = useTopupStore();
 
@@ -171,17 +172,26 @@ const subject = ref('Kendala Top-Up / Pembayaran');
 const message = ref('');
 const isSubmitting = ref(false);
 
-const handleFormSubmit = () => {
+const handleFormSubmit = async () => {
   if (!name.value || !email.value || !message.value) return;
 
   isSubmitting.value = true;
-  setTimeout(() => {
-    isSubmitting.value = false;
+  try {
+    const fullMessage = subject.value ? `[${subject.value}] ${message.value}` : message.value;
+    await contactService.createContactMessage({
+      name: name.value,
+      email: email.value,
+      message: fullMessage
+    });
     store.showToast(`Terima kasih ${name.value}, pesan Anda berhasil terkirim! Tim CS akan membalas ke ${email.value}`, 'success');
     name.value = '';
     email.value = '';
     message.value = '';
-  }, 600);
+  } catch (err) {
+    store.showToast(err.response?.data?.message || err.message || 'Gagal mengirim pesan. Silakan coba lagi.', 'error');
+  } finally {
+    isSubmitting.value = false;
+  }
 };
 
 const handleCopyEmail = () => {

@@ -27,6 +27,14 @@ export const adminService = {
   },
 
   /**
+   * Soft-delete a product
+   * DELETE /api/v1/admin/products/{id}
+   */
+  async deleteProduct(id) {
+    return axiosClient.delete(`/admin/products/${id}`);
+  },
+
+  /**
    * List affiliate registrations
    * GET /api/v1/admin/affiliates
    */
@@ -104,7 +112,32 @@ export const adminService = {
    */
   async getTransactions(params = {}) {
     return axiosClient.get('/admin/transactions', { params });
+  },
+
+  /**
+   * List support/partnership messages
+   * GET /api/v1/admin/contact-messages
+   */
+  async getContactMessages(params = {}) {
+    return axiosClient.get('/admin/contact-messages', { params });
+  },
+
+  /**
+   * Mark a support/partnership message resolved
+   * POST /api/v1/admin/contact-messages/{id}/resolve
+   */
+  async resolveContactMessage(id) {
+    return axiosClient.post(`/admin/contact-messages/${id}/resolve`);
+  },
+
+  /**
+   * Soft-delete a contact message
+   * DELETE /api/v1/admin/contact-messages/{id}
+   */
+  async deleteContactMessage(id) {
+    return axiosClient.delete(`/admin/contact-messages/${id}`);
   }
 };
 
 export default adminService;
+
