@@ -57,6 +57,14 @@ const routes = [
     meta: { title: 'Dashboard Affiliate - YayTopup' }
   },
   {
+    path: '/admin',
+    redirect: '/admin/products'
+  },
+  {
+    path: '/admin/dashboard',
+    redirect: '/admin/products'
+  },
+  {
     path: '/admin/products',
     name: 'admin-products',
     component: AdminProductsView,

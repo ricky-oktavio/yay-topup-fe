@@ -34,13 +34,41 @@
 </template>
 
 <script setup>
+import { useRouter } from 'vue-router';
 import { UserIcon, Logout01Icon } from 'hugeicons-vue';
 import { useTopupStore } from '../../stores/topupStore';
 
+const router = useRouter();
 const store = useTopupStore();
 
 const handleProfile = () => {
-  store.showToast(`Halo, ${store.user?.name || 'User'}! Saldo Anda: ${store.formattedBalance}`, 'info');
+  const token = store.accessToken || localStorage.getItem('yaytopup_auth_token');
+  if (!token) {
+    router.push('/login');
+    return;
+  }
+
+  let user = store.user;
+  if (!user) {
+    try {
+      const raw = localStorage.getItem('yaytopup_user_data');
+      if (raw && raw !== 'null' && raw !== 'undefined') {
+        user = JSON.parse(raw);
+      }
+    } catch (e) {
+      user = null;
+    }
+  }
+
+  const role = (user?.role || user?.role_name || '').toLowerCase();
+  const email = (user?.email || '').toLowerCase();
+
+  // Navigate to Super Admin / Affiliate dashboard according to user role data
+  if (role === 'admin' || role === 'superadmin' || role === 'super_admin' || email.includes('admin')) {
+    router.push('/admin/products');
+  } else {
+    router.push('/affiliate/dashboard');
+  }
 };
 </script>
 

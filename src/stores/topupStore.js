@@ -2,6 +2,16 @@ import { defineStore } from 'pinia';
 import { topupService } from '../api/topupService';
 import { authService } from '../api/authService';
 
+const getInitialUser = () => {
+  try {
+    const raw = localStorage.getItem('yaytopup_user_data');
+    if (!raw || raw === 'null' || raw === 'undefined') return null;
+    return JSON.parse(raw);
+  } catch (e) {
+    return null;
+  }
+};
+
 export const useTopupStore = defineStore('topup', {
   state: () => ({
     // Data states
@@ -29,7 +39,7 @@ export const useTopupStore = defineStore('topup', {
     
     // User Auth & Session State
     isLoggedIn: !!localStorage.getItem('yaytopup_auth_token'),
-    user: JSON.parse(localStorage.getItem('yaytopup_user_data') || 'null'),
+    user: getInitialUser(),
     accessToken: localStorage.getItem('yaytopup_auth_token') || '',
     refreshToken: localStorage.getItem('yaytopup_refresh_token') || '',
 
