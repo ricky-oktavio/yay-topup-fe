@@ -55,29 +55,49 @@
                 <span class="row-value">{{ searchResult.product }}</span>
               </div>
 
-              <div class="result-row">
+              <div class="result-row" v-if="searchResult.targetUser && searchResult.targetUser !== '-'">
                 <span class="row-label">Target User ID</span>
                 <span class="row-value">{{ searchResult.targetUser }}</span>
               </div>
 
               <div class="result-row">
-                <span class="row-label">Status</span>
+                <span class="row-label">Status Pembayaran</span>
                 <span 
                   class="badge-status"
-                  :class="searchResult.status === 'PAID' || searchResult.status === 'SUCCESS' ? 'badge-paid' : 'badge-pending'"
+                  :class="searchResult.paymentStatus === 'PAID' || searchResult.paymentStatus === 'SUCCESS' ? 'badge-paid' : 'badge-pending'"
                 >
-                  {{ searchResult.status }}
+                  {{ searchResult.paymentStatus }}
+                </span>
+              </div>
+
+              <div class="result-row" v-if="searchResult.providerStatus">
+                <span class="row-label">Status Provider</span>
+                <span 
+                  class="badge-status"
+                  :class="searchResult.providerStatus === 'SUCCESS' ? 'badge-paid' : 'badge-pending'"
+                >
+                  {{ searchResult.providerStatus }}
                 </span>
               </div>
 
               <div class="result-row">
                 <span class="row-label">Total Bayar</span>
-                <span class="total-pink-price">Rp {{ searchResult.amount.toLocaleString('id-ID') }}</span>
+                <span class="total-pink-price">Rp {{ formatRupiah(searchResult.amount) }}</span>
               </div>
 
               <div class="result-row">
                 <span class="row-label">Tanggal Transaksi</span>
                 <span class="row-value mute-val">{{ searchResult.date }}</span>
+              </div>
+
+              <div class="result-row" v-if="searchResult.paidAt">
+                <span class="row-label">Waktu Dibayar</span>
+                <span class="row-value mute-val">{{ searchResult.paidAt }}</span>
+              </div>
+
+              <div class="result-row" v-if="searchResult.completedAt">
+                <span class="row-label">Waktu Selesai</span>
+                <span class="row-value mute-val">{{ searchResult.completedAt }}</span>
               </div>
             </div>
           </div>
@@ -115,6 +135,30 @@ const searchId = ref('');
 const isSearching = ref(false);
 const searchResult = ref(null);
 
+const formatRupiah = (val) => {
+  const num = Number(val) || 0;
+  return num.toLocaleString('id-ID');
+};
+
+const formatDate = (isoString) => {
+  if (!isoString) return '-';
+  try {
+    const d = new Date(isoString);
+    if (isNaN(d.getTime())) return isoString;
+    return d.toLocaleString('id-ID', {
+      timeZone: 'Asia/Jakarta',
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: false
+    }).replace(/\./g, ':') + ' WIB';
+  } catch (e) {
+    return isoString;
+  }
+};
+
 const handleCheckStatus = async () => {
   const query = searchId.value.trim();
   if (!query) return;
@@ -123,15 +167,20 @@ const handleCheckStatus = async () => {
   try {
     // 1. Try querying live transaction API
     const apiRes = await store.getTransactionStatus(query);
-    if (apiRes && apiRes.data) {
-      const trx = apiRes.data;
+    const trx = apiRes?.data?.data || apiRes?.data || apiRes;
+
+    if (trx && (trx.transaction_id || trx.id)) {
       searchResult.value = {
-        id: trx.id || query,
+        id: trx.transaction_id || trx.id || query,
         product: trx.product_name || trx.product || 'Momo Live Coin',
-        targetUser: trx.target_user_id || trx.targetUser || '-',
-        status: (trx.status || 'PAID').toUpperCase(),
-        amount: Number(trx.amount || 0),
-        date: trx.created_at || new Date().toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' })
+        targetUser: trx.target_user_id || trx.user_id || trx.targetUser || '-',
+        paymentStatus: (trx.payment_status || trx.status || 'PAID').toUpperCase(),
+        providerStatus: trx.provider_status ? trx.provider_status.toUpperCase() : 'SUCCESS',
+        status: (trx.payment_status || trx.status || 'PAID').toUpperCase(),
+        amount: Number(trx.gross_amount || trx.amount || 0),
+        date: formatDate(trx.created_at || trx.createdAt),
+        paidAt: trx.paid_at ? formatDate(trx.paid_at) : null,
+        completedAt: trx.completed_at ? formatDate(trx.completed_at) : null
       };
       store.showToast('Data transaksi berhasil ditemukan!', 'success');
       return;
@@ -147,9 +196,13 @@ const handleCheckStatus = async () => {
         id: foundInStore.id,
         product: foundInStore.productName || 'Momo Live Coin',
         targetUser: foundInStore.targetAccount,
-        status: foundInStore.status === 'SUCCESS' ? 'PAID' : foundInStore.status,
+        paymentStatus: foundInStore.status === 'SUCCESS' ? 'PAID' : (foundInStore.status || 'PAID').toUpperCase(),
+        providerStatus: 'SUCCESS',
+        status: foundInStore.status === 'SUCCESS' ? 'PAID' : (foundInStore.status || 'PAID').toUpperCase(),
         amount: Number(foundInStore.amount || 0),
-        date: foundInStore.createdAt
+        date: foundInStore.createdAt,
+        paidAt: null,
+        completedAt: null
       };
       store.showToast('Data transaksi ditemukan!', 'success');
     } else {

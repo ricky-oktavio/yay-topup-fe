@@ -293,13 +293,16 @@ const formatDate = (isoString) => {
   if (!isoString) return '-';
   try {
     const d = new Date(isoString);
-    return d.toLocaleDateString('id-ID', {
+    if (isNaN(d.getTime())) return isoString;
+    return d.toLocaleString('id-ID', {
+      timeZone: 'Asia/Jakarta',
       day: '2-digit',
       month: 'short',
       year: 'numeric',
       hour: '2-digit',
-      minute: '2-digit'
-    });
+      minute: '2-digit',
+      hour12: false
+    }).replace(/\./g, ':') + ' WIB';
   } catch (e) {
     return isoString;
   }

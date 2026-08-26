@@ -138,6 +138,25 @@ const searchQuery = ref('');
 const transactions = ref([]);
 const isLoading = ref(false);
 
+const formatDate = (isoString) => {
+  if (!isoString) return '-';
+  try {
+    const d = new Date(isoString);
+    if (isNaN(d.getTime())) return isoString;
+    return d.toLocaleString('id-ID', {
+      timeZone: 'Asia/Jakarta',
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: false
+    }).replace(/\./g, ':') + ' WIB';
+  } catch (e) {
+    return isoString;
+  }
+};
+
 const loadTransactions = async () => {
   isLoading.value = true;
   try {
@@ -152,7 +171,7 @@ const loadTransactions = async () => {
 
     transactions.value = list.map(t => ({
       id: t.id ? `#${t.id}` : (t.transaction_id ? `#${t.transaction_id}` : '#TRX'),
-      date: t.created_at || t.date || new Date().toLocaleString('id-ID'),
+      date: formatDate(t.created_at || t.date || t.createdAt),
       product: t.product_name || t.product || 'Momo Live Coin',
       targetUser: t.target_user_id || t.targetUser || '-',
       amount: Number(t.gross_amount || t.amount || 0),
