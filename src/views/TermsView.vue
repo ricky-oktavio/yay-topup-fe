@@ -26,7 +26,7 @@
             <div class="legal-intro-box">
               <InformationCircleIcon :size="22" class="intro-icon" />
               <p>
-                Selamat datang di <strong>YayTopup</strong> (PT. JLIMA DIGITAL INDONESIA). Harap baca Ketentuan Layanan ini secara saksama sebelum menggunakan platform top-up, layanan pembayaran, atau program afiliasi kami.
+                Selamat datang di <strong>YayTopup</strong>. Harap baca Ketentuan Layanan ini secara saksama sebelum menggunakan platform top-up, layanan pembayaran, atau program afiliasi kami.
               </p>
             </div>
 
@@ -101,7 +101,6 @@
           <router-link to="/privacy">Privacy Policy</router-link>
           <router-link to="/contact">Contact Us</router-link>
         </nav>
-        <p class="footer-copyright"> </p>
       </div>
     </footer>
   </div>

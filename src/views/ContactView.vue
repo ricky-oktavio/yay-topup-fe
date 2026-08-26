@@ -56,7 +56,7 @@
               </div>
               <div class="info-text-box">
                 <span class="info-label">Kantor Utama</span>
-                <strong class="info-value">PT. JLIMA DIGITAL INDONESIA</strong>
+                <strong class="info-value">YayTopup Head Office</strong>
                 <span class="info-sub">Jakarta South District, Indonesia</span>
               </div>
             </div>
@@ -152,7 +152,6 @@
           <router-link to="/privacy">Privacy Policy</router-link>
           <router-link to="/contact">Contact Us</router-link>
         </nav>
-        <p class="footer-copyright">© 2026 PT. JLIMA DIGITAL INDONESIA. All rights reserved.</p>
       </div>
     </footer>
   </div>

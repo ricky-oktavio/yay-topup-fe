@@ -142,4 +142,4 @@ yaytopup/
 
 ## 📄 Lisensi & Hak Cipta
 
-© 2026 **PT. JLIMA DIGITAL INDONESIA**. All rights reserved.
+© 2026 **YayTopup**. All rights reserved.

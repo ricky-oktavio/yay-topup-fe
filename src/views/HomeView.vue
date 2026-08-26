@@ -155,7 +155,6 @@
             <router-link to="/privacy">Kebijakan Privasi</router-link>
             <router-link to="/contact">Bantuan</router-link>
           </nav>
-          <p class="footer-copyright">© 2026 PT. JLIMA DIGITAL INDONESIA. Hak cipta dilindungi.</p>
         </div>
       </footer>
     </div>
@@ -705,7 +704,6 @@
             <router-link to="/privacy">Kebijakan Privasi</router-link>
             <router-link to="/contact">Bantuan</router-link>
           </nav>
-          <p class="footer-copyright">© 2026 PT. JLIMA DIGITAL INDONESIA. Hak cipta dilindungi.</p>
         </div>
       </footer>
 

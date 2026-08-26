@@ -106,7 +106,6 @@
           <router-link to="/privacy">Privacy Policy</router-link>
           <router-link to="/contact">Contact Us</router-link>
         </nav>
-        <p class="footer-copyright"> </p>
       </div>
     </footer>
   </div>

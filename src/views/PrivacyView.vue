@@ -26,7 +26,7 @@
             <div class="legal-intro-box privacy-box">
               <InformationCircleIcon :size="22" class="intro-icon-green" />
               <p>
-                Di <strong>YayTopup</strong> (PT. JLIMA DIGITAL INDONESIA), kerahasiaan dan keamanan data pribadi Anda adalah prioritas utama kami. Kebijakan Privasi ini menjelaskan bagaimana kami mengumpulkan, menggunakan, dan melindungi informasi Anda.
+                Di <strong>YayTopup</strong>, kerahasiaan dan keamanan data pribadi Anda adalah prioritas utama kami. Kebijakan Privasi ini menjelaskan bagaimana kami mengumpulkan, menggunakan, dan melindungi informasi Anda.
               </p>
             </div>
 
@@ -102,7 +102,6 @@
           <router-link to="/privacy">Privacy Policy</router-link>
           <router-link to="/contact">Contact Us</router-link>
         </nav>
-        <p class="footer-copyright"> </p>
       </div>
     </footer>
   </div>
