@@ -10,8 +10,10 @@ import ApiTestView from '../views/ApiTestView.vue';
 
 // Legal & Contact Views
 import TermsView from '../views/TermsView.vue';
+import RefundView from '../views/RefundView.vue';
 import PrivacyView from '../views/PrivacyView.vue';
 import ContactView from '../views/ContactView.vue';
+import FaqView from '../views/FaqView.vue';
 
 // Affiliate Views
 import AffiliateView from '../views/affiliate/AffiliateView.vue';
@@ -36,19 +38,31 @@ const routes = [
     path: '/terms',
     name: 'terms',
     component: TermsView,
-    meta: { title: 'Terms of Service - YayTopup' }
+    meta: { title: 'Syarat & Ketentuan - YayTopup' }
+  },
+  {
+    path: '/refund',
+    name: 'refund',
+    component: RefundView,
+    meta: { title: 'Kebijakan Pengembalian Dana - YayTopup' }
   },
   {
     path: '/privacy',
     name: 'privacy',
     component: PrivacyView,
-    meta: { title: 'Privacy Policy - YayTopup' }
+    meta: { title: 'Kebijakan Privasi - YayTopup' }
+  },
+  {
+    path: '/faq',
+    name: 'faq',
+    component: FaqView,
+    meta: { title: 'FAQ & Pusat Bantuan - YayTopup' }
   },
   {
     path: '/contact',
     name: 'contact',
     component: ContactView,
-    meta: { title: 'Contact Us - YayTopup' }
+    meta: { title: 'Hubungi Kami - YayTopup' }
   },
   {
     path: '/affiliate/dashboard',

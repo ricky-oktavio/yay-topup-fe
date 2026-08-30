@@ -12,6 +12,7 @@
       <!-- Navigation Right Controls -->
       <div class="navbar-right">
         <router-link to="/status" class="nav-link-status">Cek Status</router-link>
+        <router-link to="/faq" class="nav-link-status">FAQ</router-link>
 
         <!-- Tampilkan Tombol Login & Register Jika BELUM Login -->
         <template v-if="!store.isLoggedIn">

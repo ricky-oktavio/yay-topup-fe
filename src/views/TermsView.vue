@@ -15,7 +15,7 @@
         <div class="legal-header">
           <span class="legal-badge">Syarat & Ketentuan</span>
           <h1 class="page-title">Terms of Service</h1>
-          <p class="page-subtitle">Terakhir diperbarui: 18 Agustus 2026</p>
+          <p class="page-subtitle">Terakhir diperbarui: 27 Agustus 2026</p>
         </div>
 
         <!-- Document Card -->
@@ -35,7 +35,7 @@
               <section class="legal-section">
                 <h2>1. Ketentuan Umum</h2>
                 <p>
-                  Dengan mengakses dan menggunakan platform YayTopup, Anda menyatakan setuju untuk terikat oleh Ketentuan Layanan ini, seluruh hukum dan peraturan yang berlaku, serta bertanggung jawab atas kepatuhan terhadap hukum lokal yang berlaku.
+                  Dengan mengakses dan menggunakan platform YayTopup, Anda menyatakan setuju untuk terikat oleh Ketentuan Layanan ini, seluruh hukum dan peraturan yang berlaku, serta bertanggung jawab atas kepatuhan terhadap hukum lokal yang berlaku. Jika Anda tidak menyetujui salah satu ketentuan ini, Anda dilarang menggunakan atau mengakses situs ini.
                 </p>
               </section>
 
@@ -43,37 +43,58 @@
               <section class="legal-section">
                 <h2>2. Layanan Top-Up & Pembayaran</h2>
                 <ul>
-                  <li>Pengguna wajib memastikan bahwa ID Akun Game / Momocoin ID yang dimasukkan sudah benar sebelum melakukan konfirmasi pembayaran.</li>
-                  <li>Seluruh transaksi yang telah berhasil diproses oleh sistem (*PAID*) bersifat final dan tidak dapat dibatalkan atau dikembalikan (*non-refundable*), kecuali disebabkan oleh kegagalan sistem YayTopup.</li>
-                  <li>Waktu pemrosesan top-up instan rata-rata membutuhkan waktu 1-5 detik setelah konfirmasi pembayaran diterima dari Payment Gateway (QRIS/VA).</li>
+                  <li>Pengguna wajib memastikan bahwa ID Akun Game / Momocoin ID / Nomor Tujuan yang dimasukkan sudah benar sebelum melakukan konfirmasi pembayaran.</li>
+                  <li>Seluruh transaksi yang telah berhasil diproses oleh sistem (status <strong>PAID</strong> atau <strong>SUCCESS</strong>) bersifat final dan tidak dapat dibatalkan atau dikembalikan (<em>non-refundable</em>), kecuali disebabkan oleh kesalahan atau kegagalan sistem YayTopup.</li>
+                  <li>Waktu pemrosesan top-up instan rata-rata membutuhkan waktu 1-5 detik setelah konfirmasi pembayaran diterima dari Payment Gateway resmi (QRIS/Virtual Account/E-Wallet).</li>
+                  <li>Harga produk yang tertera pada website dapat berubah sewaktu-waktu tanpa pemberitahuan sebelumnya menyesuaikan dengan tarif resmi publisher game/layanan.</li>
                 </ul>
               </section>
 
               <!-- Section 3 -->
               <section class="legal-section">
-                <h2>3. Program Afiliasi Partner</h2>
+                <h2>3. Kebijakan Pengembalian Dana (Refund)</h2>
                 <p>
-                  Mitra afiliasi berhak menerima komisi sesuai dengan *Commission Rate* yang berlaku atas transaksi yang menggunakan Kode Referral resmi mitra.
+                  Pengembalian dana hanya berlaku dalam situasi khusus sesuai dengan aturan ketat kami. Untuk mempelajari lebih lanjut syarat dan tata cara pengajuan klaim, silakan baca 
+                  <router-link to="/refund" class="legal-link">Kebijakan Pengembalian Dana (Refund Policy)</router-link> kami.
                 </p>
-                <ul>
-                  <li>Minimum batas penarikan saldo komisi adalah sebesar <strong>Rp 50.000</strong>.</li>
-                  <li>YayTopup berhak menangguhkan akun afiliasi jika terindikasi melakukan tindakan kecurangan, manipulasi referral, atau aktivitas spaming yang merugikan.</li>
-                </ul>
               </section>
 
               <!-- Section 4 -->
               <section class="legal-section">
-                <h2>4. Batasan Tanggung Jawab</h2>
+                <h2>4. Program Afiliasi Partner</h2>
                 <p>
-                  YayTopup tidak bertanggung jawab atas kerugian yang disebabkan oleh kesalahan penginputan ID akun oleh pengguna, gangguan jaringan dari penyedia game (*game publisher*), atau pemeliharaan server (*maintenance*) dari pihak ketiga.
+                  Mitra afiliasi berhak menerima komisi sesuai dengan <em>Commission Rate</em> yang berlaku atas transaksi valid yang menggunakan Kode Referral resmi mitra.
                 </p>
+                <ul>
+                  <li>Minimum batas penarikan saldo komisi adalah sebesar <strong>Rp 50.000</strong>.</li>
+                  <li>YayTopup berhak menangguhkan atau membatalkan akun afiliasi jika terindikasi melakukan tindakan kecurangan, manipulasi referral, atau aktivitas spamming yang merugikan.</li>
+                </ul>
               </section>
 
               <!-- Section 5 -->
               <section class="legal-section">
-                <h2>5. Perubahan Ketentuan</h2>
+                <h2>5. Batasan Tanggung Jawab</h2>
                 <p>
-                  YayTopup berhak untuk mengubah atau memperbarui Ketentuan Layanan ini sewaktu-waktu tanpa pemberitahuan sebelumnya. Perubahan akan berlaku efektif sejak ditayangkan di halaman ini.
+                  YayTopup tidak bertanggung jawab atas kerugian yang disebabkan oleh kesalahan penginputan ID akun oleh pengguna, gangguan jaringan dari penyedia game (<em>game publisher</em>), atau pemeliharaan server (<em>maintenance</em>) dari pihak ketiga.
+                </p>
+              </section>
+
+              <!-- Section 6 -->
+              <section class="legal-section">
+                <h2>6. Hak Kekayaan Intelektual & Privasi</h2>
+                <p>
+                  Seluruh merek dagang, logo game, dan nama produk yang ditampilkan pada situs YayTopup adalah milik dari pemilik hak cipta masing-masing. Informasi pribadi Anda dilindungi sesuai dengan 
+                  <router-link to="/privacy" class="legal-link">Kebijakan Privasi</router-link> kami.
+                </p>
+              </section>
+
+              <!-- Section 7 -->
+              <section class="legal-section">
+                <h2>7. Pertanyaan & Bantuan FAQ</h2>
+                <p>
+                  Jika Anda memiliki pertanyaan seputar cara bertransaksi atau mengalami kendala teknis, silakan kunjungi halaman 
+                  <router-link to="/faq" class="legal-link">FAQ & Pusat Bantuan</router-link> atau hubungi tim customer service melalui 
+                  <router-link to="/contact" class="legal-link">Halaman Contact Us</router-link>.
                 </p>
               </section>
             </div>
@@ -97,9 +118,11 @@
           <img src="../assets/logo-yay-clean.png" alt="YayTopup Logo" class="footer-emblem-clean" />
         </div>
         <nav class="footer-links">
-          <router-link to="/terms">Terms of Service</router-link>
-          <router-link to="/privacy">Privacy Policy</router-link>
-          <router-link to="/contact">Contact Us</router-link>
+          <router-link to="/terms">Syarat & Ketentuan</router-link>
+          <router-link to="/refund">Kebijakan Refund</router-link>
+          <router-link to="/privacy">Kebijakan Privasi</router-link>
+          <router-link to="/faq">FAQ</router-link>
+          <router-link to="/contact">Hubungi Kami</router-link>
         </nav>
       </div>
     </footer>
@@ -264,13 +287,23 @@ import { InformationCircleIcon } from 'hugeicons-vue';
   font-weight: 800;
   color: #0f172a;
   margin-bottom: 0.6rem;
-
 }
 
 .legal-section p {
   font-size: 0.95rem;
   color: #475569;
   line-height: 1.7;
+}
+
+.legal-link {
+  color: #7c3aed;
+  font-weight: 600;
+  text-decoration: underline;
+  transition: color 0.15s ease;
+}
+
+.legal-link:hover {
+  color: #651fff;
 }
 
 .legal-section ul {
@@ -345,10 +378,6 @@ import { InformationCircleIcon } from 'hugeicons-vue';
 
 .footer-links a:hover {
   color: #7c3aed;
-}
-
-.footer-copyright {
-  color: #94a3b8;
 }
 
 @media (max-width: 640px) {

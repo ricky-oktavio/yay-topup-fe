@@ -100,19 +100,6 @@
               </div>
             </div>
 
-            <!-- Presets -->
-            <div class="coin-presets">
-              <button 
-                v-for="preset in presets" 
-                :key="preset"
-                class="preset-chip"
-                :class="{ active: coinAmount === preset }"
-                @click="coinAmount = preset"
-              >
-                +{{ preset.toLocaleString('id-ID') }} Koin
-              </button>
-            </div>
-
             <!-- Summary -->
             <div class="summary-section">
               <div class="summary-line">
@@ -152,8 +139,10 @@
           </div>
           <nav class="footer-links">
             <router-link to="/terms">Syarat & Ketentuan</router-link>
+            <router-link to="/refund">Kebijakan Refund</router-link>
             <router-link to="/privacy">Kebijakan Privasi</router-link>
-            <router-link to="/contact">Bantuan</router-link>
+            <router-link to="/faq">FAQ</router-link>
+            <router-link to="/contact">Hubungi Kami</router-link>
           </nav>
         </div>
       </footer>
@@ -228,72 +217,40 @@
             <div class="v2-card">
               <h2 class="v2-card-title">Pilih Nominal Layanan</h2>
               <div class="v2-card-body">
-                
-                <!-- Custom Denom Top Bar -->
-                <div 
-                  class="v2-custom-bar"
-                  :class="{ active: denomMode === 'custom' }"
-                  @click="denomMode = 'custom'"
-                >
-                  <div class="v2-custom-left">
-                    <span class="v2-custom-text">Nominal Custom / Manual</span>
+                <div class="v2-custom-drawer" style="display: block;">
+                  <div class="v3-form-group">
+                    <label class="v3-label" style="font-weight: 700; margin-bottom: 6px; display: block; color: #ffffff;">Jumlah Koin</label>
+                    <input 
+                      v-model.number="coinAmount" 
+                      type="number" 
+                      min="0"
+                      class="v2-input" 
+                      placeholder="Masukkan jumlah koin (contoh: 10000)"
+                    />
                   </div>
-                  <span class="v2-custom-min">Min. Rp 1.000</span>
-                </div>
 
-                <!-- Custom Amount Input Drawer -->
-                <div v-if="denomMode === 'custom'" class="v2-custom-drawer animate-fade-down">
-                  <input 
-                    v-model.number="coinAmount" 
-                    type="number" 
-                    min="0"
-                    class="v2-input" 
-                    placeholder="Masukkan jumlah koin (contoh: 10000)"
-                  />
-                  <div class="v2-presets-row">
-                    <button 
-                      v-for="preset in presets" 
-                      :key="preset"
-                      class="v2-preset-chip"
-                      :class="{ active: coinAmount === preset }"
-                      @click="coinAmount = preset"
-                    >
-                      +{{ preset.toLocaleString('id-ID') }} Koin
-                    </button>
-                  </div>
-                </div>
-
-                <!-- Package Grid -->
-                <div v-if="packagesList.length === 0" class="v2-loading-box">
-                  <Loading01Icon :size="24" class="spin-icon" />
-                  <span>Memuat daftar paket koin resmi...</span>
-                </div>
-                <div v-else class="v2-packages-grid">
-                  <div 
-                    v-for="pkg in packagesList" 
-                    :key="pkg.id"
-                    class="v2-pkg-card"
-                    :class="{ 
-                      active: denomMode === 'packages' && selectedPackage?.id === pkg.id,
-                      featured: pkg.isFeatured
-                    }"
-                    @click="selectPackage(pkg)"
-                  >
-                    <div v-if="pkg.badge" class="v2-featured-tag">{{ pkg.badge }}</div>
-                    <div class="v2-pkg-left">
-                      <h3 class="v2-pkg-name">{{ pkg.name }}</h3>
-                      <p v-if="pkg.bonus > 0" class="v2-pkg-bonus">Bonus {{ pkg.bonus.toLocaleString('id-ID') }}</p>
-                      <p class="v2-pkg-price">Rp {{ pkg.price.toLocaleString('id-ID') }}</p>
+                  <!-- Bonus Info Banner for V2 -->
+                  <Transition name="side-fade" mode="out-in">
+                    <div v-if="matchedPackage && matchedPackage.bonus > 0" class="v3-bonus-alert-box" style="margin-top: 12px;">
+                      <div class="v3-bonus-alert-header">
+                        <div class="v3-bonus-badge-title">
+                          <CheckmarkBadge01Icon :size="18" />
+                          <span>INFORMASI BONUS</span>
+                        </div>
+                        <span v-if="matchedPackage.badge" class="v3-bonus-tag-pill">{{ matchedPackage.badge }}</span>
+                      </div>
+                      <div class="v3-bonus-alert-body">
+                        <p>
+                          Nominal <strong>{{ matchedPackage.coins.toLocaleString('id-ID') }} Koin</strong> sesuai pilihan paket dan mendapatkan bonus 
+                          <strong class="v3-bonus-highlight">+{{ matchedPackage.bonus.toLocaleString('id-ID') }} Koin</strong>!
+                        </p>
+                        <div class="v3-bonus-total-row">
+                          Total koin yang akan Anda dapatkan: <strong>{{ (matchedPackage.coins + matchedPackage.bonus).toLocaleString('id-ID') }} Koin</strong>
+                        </div>
+                      </div>
                     </div>
-                    <div class="v2-pkg-thumb">
-                      <img src="../assets/momo.jpeg" alt="Momo Coin" class="v2-thumb-img" />
-                    </div>
-                    <div class="v2-pkg-check">
-                      <CheckmarkCircle01Icon :size="16" />
-                    </div>
-                  </div>
+                  </Transition>
                 </div>
-
               </div>
             </div>
 
@@ -509,72 +466,14 @@
               <div class="v3-step-number">2</div>
               <div class="v3-step-heading-info">
                 <h2 class="v3-step-title">Pilih Nominal Koin</h2>
-                <p class="v3-step-desc">Pilih paket koin yang tersedia atau masukkan jumlah koin secara manual.</p>
+                <p class="v3-step-desc">Masukkan jumlah koin yang ingin dibeli.</p>
               </div>
             </div>
 
             <div class="v3-step-content">
-              <!-- Mode Tabs Switcher -->
-              <div class="v3-mode-tabs">
-                <button 
-                  class="v3-mode-btn" 
-                  :class="{ active: denomMode === 'packages' }"
-                  @click="denomMode = 'packages'"
-                >
-                  Pilihan Paket
-                </button>
-                <button 
-                  class="v3-mode-btn" 
-                  :class="{ active: denomMode === 'custom' }"
-                  @click="denomMode = 'custom'"
-                >
-                  Nominal Bebas
-                </button>
-              </div>
-
-              <!-- Packages Grid (Clean Light Card Design) -->
-              <div v-if="denomMode === 'packages'">
-                <div v-if="v3Packages.length === 0" class="v3-loading-box">
-                  <Loading01Icon :size="24" class="spin-icon" />
-                  <span>Memuat daftar paket koin resmi...</span>
-                </div>
-                <div v-else class="v3-packages-grid">
-                  <div 
-                    v-for="pkg in v3Packages" 
-                    :key="pkg.id"
-                    class="v3-pkg-card"
-                    :class="{ 
-                      active: selectedPackage?.id === pkg.id,
-                      featured: pkg.isFeatured 
-                    }"
-                    @click="selectPackage(pkg)"
-                  >
-                    <div v-if="pkg.badge" class="v3-pkg-badge">{{ pkg.badge }}</div>
-                    <div class="v3-pkg-inner">
-                      <div class="v3-pkg-left-info">
-                        <div class="v3-pkg-top-row">
-                          <img src="../assets/momo.jpeg" alt="Momo Coin" class="v3-coin-avatar" />
-                          <h3 class="v3-pkg-title">{{ pkg.name }}</h3>
-                        </div>
-                        <div v-if="pkg.bonus > 0" class="v3-pkg-bonus">+Bonus {{ pkg.bonus.toLocaleString('id-ID') }} Koin</div>
-                        <div class="v3-pkg-price">Rp {{ pkg.price.toLocaleString('id-ID') }}</div>
-                      </div>
-                      <div class="v3-pkg-thumb-wrap">
-                        <img src="../assets/momo.jpeg" alt="Momo Coin" class="v3-thumb-img" />
-                      </div>
-                    </div>
-                    
-                    <div class="v3-pkg-check">
-                      <CheckmarkCircle01Icon :size="20" />
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Custom Amount Mode -->
-              <div v-else class="v3-custom-section">
+              <div class="v3-custom-section">
                 <div class="v3-form-group">
-                  <label class="v3-label">Jumlah Koin</label>
+                  <label class="v3-label">Jumlah Koin <span class="v3-req">*</span></label>
                   <div class="v3-input-icon-wrap">
                     <span class="v3-input-icon">
                       <Coins01Icon :size="20" />
@@ -589,17 +488,27 @@
                   </div>
                 </div>
 
-                <div class="v3-presets-flex">
-                  <button 
-                    v-for="preset in presets" 
-                    :key="preset"
-                    class="v3-preset-chip"
-                    :class="{ active: coinAmount === preset }"
-                    @click="coinAmount = preset"
-                  >
-                    +{{ preset.toLocaleString('id-ID') }} Koin
-                  </button>
-                </div>
+                <!-- Bonus Information Alert (Displays when matchedPackage has bonus > 0) -->
+                <Transition name="side-fade" mode="out-in">
+                  <div v-if="matchedPackage && matchedPackage.bonus > 0" class="v3-bonus-alert-box">
+                    <div class="v3-bonus-alert-header">
+                      <div class="v3-bonus-badge-title">
+                        <CheckmarkBadge01Icon :size="18" />
+                        <span>INFORMASI BONUS</span>
+                      </div>
+                      <span v-if="matchedPackage.badge" class="v3-bonus-tag-pill">{{ matchedPackage.badge }}</span>
+                    </div>
+                    <div class="v3-bonus-alert-body">
+                      <p>
+                        Nominal <strong>{{ matchedPackage.coins.toLocaleString('id-ID') }} Koin</strong> sesuai pilihan paket dan mendapatkan bonus 
+                        <strong class="v3-bonus-highlight">+{{ matchedPackage.bonus.toLocaleString('id-ID') }} Koin</strong>!
+                      </p>
+                      <div class="v3-bonus-total-row">
+                        Total koin yang akan Anda dapatkan: <strong>{{ (matchedPackage.coins + matchedPackage.bonus).toLocaleString('id-ID') }} Koin</strong>
+                      </div>
+                    </div>
+                  </div>
+                </Transition>
               </div>
             </div>
           </div>
@@ -664,6 +573,10 @@
                 <span class="lbl">Jumlah Koin:</span>
                 <span class="val">{{ v3CoinLabel }}</span>
               </div>
+              <div v-if="matchedPackage && matchedPackage.bonus > 0" class="v3-s-row bonus">
+                <span class="lbl">Bonus Koin:</span>
+                <span class="val bonus-val">+{{ matchedPackage.bonus.toLocaleString('id-ID') }} Koin</span>
+              </div>
               <!-- <div class="v3-s-row">
                 <span class="lbl">Metode Bayar:</span>
                 <span class="val">{{ activeMethodObj?.name || 'QRIS' }}</span>
@@ -701,8 +614,10 @@
           </div>
           <nav class="footer-links">
             <router-link to="/terms">Syarat & Ketentuan</router-link>
+            <router-link to="/refund">Kebijakan Refund</router-link>
             <router-link to="/privacy">Kebijakan Privasi</router-link>
-            <router-link to="/contact">Bantuan</router-link>
+            <router-link to="/faq">FAQ</router-link>
+            <router-link to="/contact">Hubungi Kami</router-link>
           </nav>
         </div>
       </footer>
@@ -790,14 +705,12 @@ const activeVersion = ref(getResolvedVersion());
 // Core Form Inputs
 const momocoinId = ref('');
 const referralCode = ref('');
-const coinAmount = ref(0);
+const coinAmount = ref(null);
 const whatsappNumber = ref('');
 const isLoading = ref(false);
 const isRefFromUrl = ref(false);
 
 // V2 & V3 States
-const denomMode = ref('packages');
-const selectedPackage = ref(null);
 const selectedPaymentCode = ref('qris');
 const expandedCategory = ref('qris');
 const showConfirmModal = ref(false);
@@ -805,6 +718,18 @@ const showConfirmModal = ref(false);
 // Packages List initialized empty - 100% full live data from API
 const packagesList = ref([]);
 const v3Packages = ref([]);
+
+const PRICE_PER_COIN = 100;
+
+// Auto-detect package matching coinAmount entered by user
+const matchedPackage = computed(() => {
+  const amt = Number(coinAmount.value) || 0;
+  if (amt <= 0) return null;
+  const list = v3Packages.value.length > 0 ? v3Packages.value : packagesList.value;
+  return list.find(p => Number(p.coins) === amt) || null;
+});
+
+const selectedPackage = computed(() => matchedPackage.value);
 
 const paymentCategories = [
   {
@@ -849,8 +774,6 @@ const paymentCategories = [
 ];
 
 onMounted(async () => {
-  selectedPackage.value = activeVersion.value === 'v2' ? packagesList.value[0] : v3Packages.value[1];
-
   if (route.query.ref) {
     referralCode.value = route.query.ref.toString();
     isRefFromUrl.value = true;
@@ -880,7 +803,6 @@ onMounted(async () => {
         ...p,
         isFeatured: Boolean(p.badge)
       }));
-      selectedPackage.value = activeVersion.value === 'v2' ? packagesList.value[0] : v3Packages.value[0];
     }
   } catch (err) {
     console.warn('[HomeView] Failed to load dynamic products', err);
@@ -926,21 +848,19 @@ watch(momocoinId, (newVal) => {
   }, 450);
 });
 
-const presets = [100, 500, 1000, 5000, 10000];
-const PRICE_PER_COIN = 100;
-
-const selectPackage = (pkg) => {
-  denomMode.value = 'packages';
-  selectedPackage.value = pkg;
-  coinAmount.value = pkg.coins;
-};
-
 // Computations
 const formattedCoins = computed(() => (Number(coinAmount.value) || 0).toLocaleString('id-ID'));
-const totalPrice = computed(() => (Number(coinAmount.value) || 0) * PRICE_PER_COIN);
+
+const totalPrice = computed(() => {
+  if (matchedPackage.value) {
+    return matchedPackage.value.price;
+  }
+  return (Number(coinAmount.value) || 0) * PRICE_PER_COIN;
+});
+
 const formattedTotal = computed(() => totalPrice.value.toLocaleString('id-ID'));
 
-const isFormValid = computed(() => momocoinId.value.trim().length >= 4 && coinAmount.value > 0);
+const isFormValid = computed(() => momocoinId.value.trim().length >= 4 && Number(coinAmount.value) > 0);
 
 const activeMethodObj = computed(() => {
   for (const cat of paymentCategories) {
@@ -951,34 +871,25 @@ const activeMethodObj = computed(() => {
 });
 
 const calculateMethodTotal = (method) => {
-  let basePrice = 0;
-  if (denomMode.value === 'packages' && selectedPackage.value) {
-    basePrice = selectedPackage.value.price;
-  } else {
-    basePrice = (Number(coinAmount.value) || 0) * PRICE_PER_COIN;
-  }
-  return basePrice + (method?.fee || 0);
+  return totalPrice.value + (method?.fee || 0);
 };
 
 const currentFinalPrice = computed(() => calculateMethodTotal(activeMethodObj.value));
-const v3FinalPrice = computed(() => calculateMethodTotal(activeMethodObj.value));
+const v3FinalPrice = computed(() => currentFinalPrice.value);
 
 const selectedCoinLabel = computed(() => {
-  if (denomMode.value === 'packages' && selectedPackage.value) {
-    return selectedPackage.value.name;
+  const amt = Number(coinAmount.value) || 0;
+  const formatted = amt.toLocaleString('id-ID');
+  if (matchedPackage.value && matchedPackage.value.bonus > 0) {
+    return `${formatted} Koin (+${matchedPackage.value.bonus.toLocaleString('id-ID')} Bonus)`;
   }
-  return `${(Number(coinAmount.value) || 0).toLocaleString('id-ID')} Koin`;
+  return `${formatted} Koin`;
 });
 
 const v3CoinLabel = computed(() => selectedCoinLabel.value);
 
-const isV2FormValid = computed(() => {
-  const hasId = momocoinId.value.trim().length >= 4;
-  const hasAmount = (denomMode.value === 'packages' && selectedPackage.value) || coinAmount.value > 0;
-  return hasId && hasAmount;
-});
-
-const isV3FormValid = computed(() => isV2FormValid.value);
+const isV2FormValid = computed(() => isFormValid.value);
+const isV3FormValid = computed(() => isFormValid.value);
 
 // Checkout actions
 const handlePayNow = () => {
@@ -1455,8 +1366,30 @@ const proceedCheckout = async () => {
 .v3-input-field.has-icon { padding-left: 2.85rem; }
 
 .v3-presets-flex { display: flex; flex-wrap: wrap; gap: 0.5rem; }
-.v3-preset-chip { padding: 0.45rem 0.85rem; border-radius: 8px; border: 1px solid #e2e8f0; background: #ffffff; color: #475569; font-size: 0.8rem; font-weight: 600; cursor: pointer; }
+.v3-preset-chip { padding: 0.45rem 0.85rem; border-radius: 8px; border: 1px solid #e2e8f0; background: #ffffff; color: #475569; font-size: 0.8rem; font-weight: 600; cursor: pointer; transition: all 0.2s ease; }
+.v3-preset-chip:hover { border-color: #8b5cf6; color: #7c3aed; }
 .v3-preset-chip.active { background: #8b5cf6; color: #ffffff; border-color: #8b5cf6; }
+
+/* Bonus Alert Box */
+.v3-bonus-alert-box {
+  background: linear-gradient(135deg, rgba(236, 72, 153, 0.06) 0%, rgba(124, 58, 237, 0.06) 100%);
+  border: 1.5px solid rgba(236, 72, 153, 0.3);
+  border-radius: 14px;
+  padding: 1rem 1.25rem;
+  margin-top: 0.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  box-shadow: 0 4px 15px -3px rgba(236, 72, 153, 0.08);
+}
+.v3-bonus-alert-header { display: flex; align-items: center; justify-content: space-between; }
+.v3-bonus-badge-title { display: flex; align-items: center; gap: 0.4rem; font-size: 0.8rem; font-weight: 800; color: #db2777; letter-spacing: 0.02em; }
+.v3-bonus-tag-pill { background: linear-gradient(135deg, #ec4899 0%, #7c3aed 100%); color: #ffffff; font-size: 0.65rem; font-weight: 800; padding: 2px 8px; border-radius: 20px; box-shadow: 0 2px 8px rgba(236, 72, 153, 0.25); }
+.v3-bonus-alert-body p { margin: 0; font-size: 0.875rem; color: #334155; line-height: 1.4; }
+.v3-bonus-highlight { color: #d97706; background: #fef3c7; padding: 2px 6px; border-radius: 6px; font-weight: 800; }
+.v3-bonus-total-row { margin-top: 0.4rem; padding-top: 0.4rem; border-top: 1px dashed rgba(236, 72, 153, 0.2); font-size: 0.875rem; font-weight: 700; color: #0f172a; }
+
+.v3-s-row.bonus .bonus-val { color: #db2777; font-weight: 800; }
 
 /* Accordion List V3 */
 .v3-accordions-list { display: flex; flex-direction: column; gap: 0.85rem; }

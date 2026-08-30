@@ -115,9 +115,11 @@
           </span>
         </div>
         <nav class="footer-links">
-          <router-link to="/terms">Terms of Service</router-link>
-          <router-link to="/privacy">Privacy Policy</router-link>
-          <router-link to="/contact">Contact Us</router-link>
+          <router-link to="/terms">Syarat & Ketentuan</router-link>
+          <router-link to="/refund">Kebijakan Refund</router-link>
+          <router-link to="/privacy">Kebijakan Privasi</router-link>
+          <router-link to="/faq">FAQ</router-link>
+          <router-link to="/contact">Hubungi Kami</router-link>
         </nav>
       </div>
     </footer>
