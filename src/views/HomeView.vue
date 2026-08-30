@@ -894,10 +894,14 @@ const isV3FormValid = computed(() => isFormValid.value);
 // Checkout actions
 const handlePayNow = () => {
   if (!isFormValid.value) return;
+  const finalCoins = Number(coinAmount.value) || 0;
+  const productId = matchedPackage.value ? matchedPackage.value.id.toString() : (v3Packages.value[0]?.id?.toString() || 'momo-coin-package');
   store.setCurrentOrder({
+    productId,
     momocoinId: momocoinId.value,
     referralCode: referralCode.value || '-',
-    coinAmount: coinAmount.value,
+    coinAmount: finalCoins,
+    bonusAmount: matchedPackage.value ? (matchedPackage.value.bonus || 0) : 0,
     totalPrice: totalPrice.value
   });
   router.push('/payment');
@@ -917,14 +921,8 @@ const openConfirmModal = () => {
 
 const proceedCheckout = async () => {
   showConfirmModal.value = false;
-  let finalCoins = 0;
-  let productId = selectedPackage.value?.id?.toString() || 'momo-coin-package';
-
-  if (denomMode.value === 'packages' && selectedPackage.value) {
-    finalCoins = selectedPackage.value.coins;
-  } else {
-    finalCoins = coinAmount.value;
-  }
+  const finalCoins = Number(coinAmount.value) || 0;
+  const productId = matchedPackage.value ? matchedPackage.value.id.toString() : (v3Packages.value[0]?.id?.toString() || 'momo-coin-package');
 
   isLoading.value = true;
   try {
@@ -933,6 +931,7 @@ const proceedCheckout = async () => {
       momocoinId: momocoinId.value,
       referralCode: referralCode.value || '-',
       coinAmount: finalCoins,
+      bonusAmount: matchedPackage.value ? (matchedPackage.value.bonus || 0) : 0,
       totalPrice: currentFinalPrice.value,
       paymentMethod: activeMethodObj.value?.name || 'Duitku Payment',
       whatsapp: whatsappNumber.value || '-'
