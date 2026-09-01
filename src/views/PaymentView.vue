@@ -25,7 +25,10 @@
         <div class="summary-rows">
           <div class="summary-item-row">
             <span class="item-name">ID Momocoin</span>
-            <strong class="item-value dark-value">{{ orderDetails.momocoinId }}</strong>
+            <div class="item-value dark-value order-id-with-avatar">
+              <img v-if="orderDetails.avatarUrl" :src="orderDetails.avatarUrl" alt="Avatar" class="payment-avatar-img" />
+              <strong>{{ orderDetails.momocoinId }}</strong>
+            </div>
           </div>
 
           <div class="summary-item-row">
@@ -432,6 +435,21 @@ const showNotice = (title) => {
   color: #111827;
   font-weight: 700;
   font-size: 1rem;
+}
+
+.order-id-with-avatar {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.payment-avatar-img {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1.5px solid #cbd5e1;
+  flex-shrink: 0;
 }
 
 .item-value.mute-value {

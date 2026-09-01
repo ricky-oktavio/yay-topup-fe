@@ -22,6 +22,8 @@ export const useTopupStore = defineStore('topup', {
     currentOrder: {
       productId: '',
       momocoinId: '',
+      avatarUrl: '',
+      verifiedName: '',
       referralCode: '',
       coinAmount: 0,
       totalPrice: 0,

@@ -55,7 +55,8 @@
                   </div>
 
                   <div v-else-if="isVerified" class="side-verified-chip">
-                    <CheckmarkBadge01Icon :size="16" class="verified-icon" />
+                    <img v-if="verifiedAvatar" :src="verifiedAvatar" alt="Avatar" class="verified-avatar-chip-img" />
+                    <CheckmarkBadge01Icon v-else :size="16" class="verified-icon" />
                     <span class="verified-name">{{ verifiedUsername }}</span>
                     <span class="verified-pill">Sesuai</span>
                   </div>
@@ -206,6 +207,8 @@
                       <span>Cek ID...</span>
                     </div>
                     <div v-else-if="isVerified" class="v2-status-tag verified">
+                      <img v-if="verifiedAvatar" :src="verifiedAvatar" alt="Avatar" class="v2-avatar-chip-img" />
+                      <CheckmarkBadge01Icon v-else :size="14" />
                       <span>Sesuai: {{ verifiedUsername }}</span>
                     </div>
                   </div>
@@ -449,7 +452,8 @@
                     </div>
 
                     <div v-else-if="isVerified" class="v3-chip verified">
-                      <CheckmarkBadge01Icon :size="16" />
+                      <img v-if="verifiedAvatar" :src="verifiedAvatar" alt="Avatar" class="v3-avatar-chip-img" />
+                      <CheckmarkBadge01Icon v-else :size="16" />
                       <span class="v3-username">{{ verifiedUsername }}</span>
                       <span class="v3-badge-pill">Sesuai</span>
                     </div>
@@ -567,7 +571,10 @@
             <div class="v3-summary-lines">
               <div class="v3-s-row">
                 <span class="lbl">ID Akun:</span>
-                <span class="val">{{ momocoinId ? `${momocoinId} (${verifiedUsername || 'Terverifikasi'})` : '-' }}</span>
+                <span class="val v3-val-with-avatar">
+                  <img v-if="verifiedAvatar" :src="verifiedAvatar" alt="Avatar" class="summary-avatar-img" />
+                  <span>{{ momocoinId ? `${momocoinId} (${verifiedUsername || 'Terverifikasi'})` : '-' }}</span>
+                </span>
               </div>
               <div class="v3-s-row">
                 <span class="lbl">Jumlah Koin:</span>
@@ -642,7 +649,10 @@
             </div>
             <div class="v2-modal-row">
               <span class="lbl">User ID:</span>
-              <span class="val highlight">{{ momocoinId }} ({{ verifiedUsername || 'Terverifikasi' }})</span>
+              <span class="val highlight modal-val-with-avatar">
+                <img v-if="verifiedAvatar" :src="verifiedAvatar" alt="Avatar" class="modal-avatar-img" />
+                <span>{{ momocoinId }} ({{ verifiedUsername || 'Terverifikasi' }})</span>
+              </span>
             </div>
             <div class="v2-modal-row">
               <span class="lbl">Jumlah Koin:</span>
@@ -813,6 +823,7 @@ onMounted(async () => {
 const isCheckingUser = ref(false);
 const isVerified = ref(false);
 const verifiedUsername = ref('');
+const verifiedAvatar = ref('');
 let checkTimer = null;
 
 watch(momocoinId, (newVal) => {
@@ -823,27 +834,33 @@ watch(momocoinId, (newVal) => {
     isCheckingUser.value = false;
     isVerified.value = false;
     verifiedUsername.value = '';
+    verifiedAvatar.value = '';
     return;
   }
 
   isCheckingUser.value = true;
   isVerified.value = false;
+  verifiedAvatar.value = '';
 
   checkTimer = setTimeout(async () => {
     try {
       const apiRes = await store.checkUserId(trimmed, 'momolive');
       isCheckingUser.value = false;
-      if (apiRes && apiRes.data && (apiRes.data.username || apiRes.data.name)) {
+      const resData = apiRes?.data || apiRes;
+      if (resData && (resData.username || resData.name || resData.nickname || resData.avatar_url || resData.avatar)) {
         isVerified.value = true;
-        verifiedUsername.value = apiRes.data.username || apiRes.data.name;
+        verifiedUsername.value = resData.username || resData.name || resData.nickname || `Momo#${trimmed.slice(-4)}`;
+        verifiedAvatar.value = resData.avatar_url || resData.avatar || resData.profile_image || resData.profile_photo || '';
       } else {
         isVerified.value = true;
         verifiedUsername.value = `Momo#${trimmed.slice(-4)}`;
+        verifiedAvatar.value = '';
       }
     } catch {
       isCheckingUser.value = false;
       isVerified.value = true;
       verifiedUsername.value = `Momo#${trimmed.slice(-4)}`;
+      verifiedAvatar.value = '';
     }
   }, 450);
 });
@@ -899,6 +916,8 @@ const handlePayNow = () => {
   store.setCurrentOrder({
     productId,
     momocoinId: momocoinId.value,
+    avatarUrl: verifiedAvatar.value,
+    verifiedName: verifiedUsername.value,
     referralCode: referralCode.value || '-',
     coinAmount: finalCoins,
     bonusAmount: matchedPackage.value ? (matchedPackage.value.bonus || 0) : 0,
@@ -929,6 +948,8 @@ const proceedCheckout = async () => {
     store.setCurrentOrder({
       productId,
       momocoinId: momocoinId.value,
+      avatarUrl: verifiedAvatar.value,
+      verifiedName: verifiedUsername.value,
       referralCode: referralCode.value || '-',
       coinAmount: finalCoins,
       bonusAmount: matchedPackage.value ? (matchedPackage.value.bonus || 0) : 0,
@@ -1263,6 +1284,51 @@ const proceedCheckout = async () => {
 .v3-chip.verified { background: rgba(16, 185, 129, 0.1); color: #059669; border: 1px solid rgba(16, 185, 129, 0.3); }
 .v3-chip.ref { background: rgba(124, 58, 237, 0.1); color: #7c3aed; border: 1px solid rgba(124, 58, 237, 0.3); }
 .v3-badge-pill { background: #10b981; color: #ffffff; padding: 2px 6px; border-radius: 6px; font-size: 0.65rem; }
+
+.verified-avatar-chip-img {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1.5px solid #10b981;
+  flex-shrink: 0;
+}
+
+.v2-avatar-chip-img {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1.5px solid #166534;
+  flex-shrink: 0;
+}
+
+.v3-avatar-chip-img {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1.5px solid #10b981;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  flex-shrink: 0;
+}
+
+.v3-val-with-avatar,
+.modal-val-with-avatar {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.summary-avatar-img,
+.modal-avatar-img {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1.5px solid #cbd5e1;
+  flex-shrink: 0;
+}
 
 .v3-input-hint { font-size: 0.8rem; color: #64748b; margin-top: 0.25rem; }
 .v3-input-hint.highlight { color: #7c3aed; font-weight: 600; }
